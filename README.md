@@ -20,6 +20,7 @@ The results of the proposed solution will be evaluated using the following metri
 Accuracy: The accuracy of the cavity detection model will be measured by the percentage of images that are correctly classified as having or not having cavities.
 Precision: The precision of the cavity detection model will be measured by the percentage of images that are classified as having cavities that actually have cavities.
 Recall: The recall of the cavity detection model will be measured by the percentage of images that actually have cavities that are classified as having cavities.
+![image](https://github.com/renzo-1/CavityQuest/assets/125778691/b3a1c4fc-f182-4c2c-97b6-b73a7b27977f)
 
 **References**
 YOLOv7: https://pjreddie.com/darknet/yolo/
