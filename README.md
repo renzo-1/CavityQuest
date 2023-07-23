@@ -1,6 +1,7 @@
 # CavityQuest
 **Cavity Detection AI Tool**
 This thesis aims to create a cavity detection AI tool using YOLOv7, Electron, React, Django, Roboflow, and a cloud service.
+![image](https://github.com/renzo-1/CavityQuest/assets/125778691/f96373c5-7244-40d1-966d-5e3d6304cd23)
 
 **Introduction**
 Cavities are a common dental problem that can cause pain, infection, and tooth loss. Early detection and treatment of cavities is important to prevent these complications. However, traditional methods of cavity detection, such as visual inspection by a dentist, can be time-consuming and inaccurate.
