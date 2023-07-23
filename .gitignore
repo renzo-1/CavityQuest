@@ -1,0 +1,37 @@
+# Logs
+front-end/logs
+front-end/*.log
+
+# Runtime data
+front-end/pids
+front-end/*.pid
+front-end/*.seed
+
+# Coverage directory used by tools like istanbul
+front-end/coverage
+front-end/.eslintcache
+
+# Dependency directory
+# https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
+front-end/node_modules
+
+# OSX
+front-end/.DS_Store
+
+front-end/release/app/dist
+front-end/release/build
+front-end/.erb/dll
+
+front-end/.idea
+front-end/npm-debug.log.*
+front-end/*.css.d.ts
+front-end/*.sass.d.ts
+front-end/*.scss.d.ts
+
+
+# back end
+
+/back-end/db.sqlite3
+/back-end/uploads
+/back-end/*.log
+
