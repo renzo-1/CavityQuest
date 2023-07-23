@@ -36,5 +36,5 @@ front-end/*.scss.d.ts
 /back-end/*.log
 venv/
 
-.vscode
+.vscode/
 
