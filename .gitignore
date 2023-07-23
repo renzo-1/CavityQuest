@@ -34,5 +34,5 @@ front-end/*.scss.d.ts
 /back-end/db.sqlite3
 /back-end/uploads
 /back-end/*.log
-/back-end/.venv
+/back-end/*.venv
 
