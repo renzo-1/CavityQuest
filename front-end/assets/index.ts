@@ -7,6 +7,8 @@ import filterBtn from './icons/filter-btn.png';
 import cloudBtn from './icons/cloud-btn.png';
 import closeBtn from './icons/x-lg.svg';
 import detectionSample from './DetectionSample.png';
+import arrow from './icons/arrow-right-circle-fill.svg';
+import trash from './icons/trash.svg'
 export {
   detection,
   records,
@@ -16,4 +18,6 @@ export {
   cloudBtn,
   closeBtn,
   detectionSample,
+  arrow,
+  trash
 };

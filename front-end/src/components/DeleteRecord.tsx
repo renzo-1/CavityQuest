@@ -2,17 +2,17 @@ import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType } from 'Interfaces';
+import { PatientDataContextType } from 'utils/Interfaces';
 
-interface Props {
+const DeleteRecord = ({
+  handleDeletionState,
+}: {
   handleDeletionState: () => void;
-}
-
-const DeleteRecord = ({ handleDeletionState }: Props) => {
+}) => {
   const { id: idParam } = useParams();
   const navigate = useNavigate();
   const { setIsNewData } = useAppContext() as PatientDataContextType;
-  
+
   const handleConfirmedDeletion = () => {
     axios
       .delete(`http://localhost:8000/api/patients/${idParam}/`)

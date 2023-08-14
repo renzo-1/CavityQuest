@@ -11,7 +11,6 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 class PatientSerializer(serializers.ModelSerializer):
     image_uploads = ImageUploadSerializer(
         many=True,
-        read_only=True,
     )
 
     class Meta:

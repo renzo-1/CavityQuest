@@ -5,7 +5,7 @@ from django.db import models
 class Patient(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female')]
 
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, auto_created=True)
     first_name = models.CharField(max_length=50, null=True)
     middle_name = models.CharField(max_length=50, null=True)
     last_name = models.CharField(max_length=50, null=True)
@@ -19,13 +19,14 @@ class Patient(models.Model):
     doctors_note = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.id}_{self.last_name}"
+        return f"{self.id}"
 
 
 def content_file_name(instance, filename):
     # file will be uploaded to MEDIA_ROOT/<patientname>/<filename>
     folder_name = instance.patient.first_name + "_" + \
         instance.patient.middle_name + "_" + instance.patient.middle_name
+
     return f"{folder_name}/{filename}"
 
 

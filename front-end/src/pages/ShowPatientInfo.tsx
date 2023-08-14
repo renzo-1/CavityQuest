@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton, PatientInfoField } from 'components';
-import { PatientData } from 'Interfaces';
-import ShowImageRecords from 'components/ShowImageRecords';
+import { PatientDataContextType } from 'utils/Interfaces';
+import ShowImageRecords from 'components/patientRecord/ShowImageRecords';
 import DeleteRecord from 'components/DeleteRecord';
-import EditRecord from 'components/EditRecord';
+import EditRecord from 'components/patientRecord/EditRecord';
+import { useAppContext } from 'features/AppContext';
 
 const ShowPatientInfo = () => {
+  const navigate = useNavigate();
   const { id: idParam } = useParams();
-  const [currPatient, setCurrPatient] = useState<PatientData | undefined>();
+  const { patientData, setCurrPatient, currPatient } =
+    useAppContext() as PatientDataContextType;
   const [isDeleting, setIsDeleting] = useState<Boolean>(false);
+
   const handleDeletionState = () => {
     setIsDeleting((prev) => !prev);
   };
- 
+
   return (
     <>
       {isDeleting && <DeleteRecord handleDeletionState={handleDeletionState} />}
@@ -28,7 +32,12 @@ const ShowPatientInfo = () => {
             >
               Delete
             </button>
-            <button className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg">
+            <button
+              onClick={() => {
+                navigate(`/detection/${idParam}`);
+              }}
+              className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg"
+            >
               New Detection
             </button>
           </div>
@@ -38,6 +47,7 @@ const ShowPatientInfo = () => {
             <div className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2 ">
               <div className="flex justify-between">
                 <div className="space-y-4">
+                  <PatientInfoField field={'ID'} data={currPatient?.id} />
                   <PatientInfoField
                     field={'Name'}
                     data={currPatient?.fullName}
@@ -46,12 +56,12 @@ const ShowPatientInfo = () => {
                     field={'Gender'}
                     data={currPatient?.gender}
                   />
+                </div>
+                <div className="space-y-4">
                   <PatientInfoField
                     field={'Date of Birth'}
                     data={currPatient?.dateOfBirth}
                   />
-                </div>
-                <div className="space-y-4">
                   <PatientInfoField
                     field={'Contact Number'}
                     data={currPatient?.contact}
@@ -63,14 +73,10 @@ const ShowPatientInfo = () => {
                 </div>
               </div>
             </div>
-            <EditRecord currPatient={currPatient}/>
+            <EditRecord />
           </div>
         )}
-        <ShowImageRecords
-          id={idParam}
-          currPatient={currPatient}
-          setCurrPatient={setCurrPatient}
-        />
+        <ShowImageRecords id={idParam} />
       </div>
     </>
   );

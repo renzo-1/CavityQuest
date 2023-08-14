@@ -11,7 +11,7 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Menu />} />
-            <Route path="/detection" element={<Detection />} />
+            <Route path="/detection/:id" element={<Detection />} />
             <Route path="/records" element={<Records />} />
             <Route path="/records/:id" element={<ShowPatientInfo />} />
           </Routes>

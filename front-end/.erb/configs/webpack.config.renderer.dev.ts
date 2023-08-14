@@ -10,7 +10,9 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
-
+import CopyPlugin from 'copy-webpack-plugin';
+import os from 'os';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
 if (process.env.NODE_ENV === 'production') {
@@ -93,6 +95,10 @@ const configuration: webpack.Configuration = {
         test: /\.(png|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
+      // MODEL
+      // {
+      //   test: /\.(onnx|ort)$/i,
+      // },
       // SVG
       {
         test: /\.svg$/,
@@ -162,13 +168,94 @@ const configuration: webpack.Configuration = {
       isDevelopment: process.env.NODE_ENV !== 'production',
       nodeModules: webpackPaths.appNodeModulesPath,
     }),
+
+    new NodePolyfillPlugin(),
+    new CopyPlugin({
+      // Use copy plugin to copy *.wasm to output folder.
+      patterns: [
+        // {
+        //   from: './node_modules/onnxruntime-web/dist/*.wasm',
+        //   to: '[name][ext]',
+        // },
+        // {
+        //   from: './src/models/model_640x640_epoch054.ort',
+        //   to: 'model_640x640.ort',
+        // },
+        // {
+        //   from: './src/models/model_256x256_epoch054.ort',
+        //   to: 'model_256x256.ort',
+        // },
+        // {
+        //   from: './src/models/sample.onnx',
+        //   to: 'sample.onnx',
+        // },
+        // {
+        //   from: './src/models/epoch_054.onnx',
+        //   to: 'epoch_054.onnx',
+        // },
+        // {
+        //   from: './src/models/model_256x256_best.onnx',
+        //   to: 'model_256x256_best.onnx',
+        // },
+        // {
+        //   from: './src/models/model_640x640_best.ort',
+        //   to: 'model_256x256_best.ort',
+        // },
+        // {
+        //   from: './src/models/model_best.ort',
+        //   to: 'model_best.ort',
+        // },
+        // {
+        //   from: './src/models/model_best.ort',
+        //   to: 'model_best.onnx',
+        // },
+        // {
+        //   from: './src/models/tfjs/model.json',
+        //   to: 'model_best.json',
+        // },
+        {
+          from: './src/models/tfjs/model.json',
+          to: 'model.json',
+        },
+        {
+          from: './src/models/tfjs/group1-shard1of6.bin',
+          to: 'group1-shard1of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard2of6.bin',
+          to: 'group1-shard2of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard3of6.bin',
+          to: 'group1-shard3of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard4of6.bin',
+          to: 'group1-shard4of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard5of6.bin',
+          to: 'group1-shard5of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard6of6.bin',
+          to: 'group1-shard6of6.bin',
+        },
+      ],
+    }),
   ],
 
   node: {
     __dirname: false,
     __filename: false,
   },
-
+  resolve: {
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false,
+    },
+  },
   devServer: {
     port,
     compress: true,
@@ -179,6 +266,7 @@ const configuration: webpack.Configuration = {
     },
     historyApiFallback: {
       verbose: true,
+      disableDotRule: true,
     },
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');

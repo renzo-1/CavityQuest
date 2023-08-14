@@ -49,6 +49,11 @@
     "test": "jest"
   },
   "browserslist": [],
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  },
   "prettier": {
     "singleQuote": true,
     "overrides": [
@@ -96,14 +101,30 @@
     }
   },
   "dependencies": {
+    "@techstark/opencv-js": "^4.8.0-release.3",
+    "@tensorflow/tfjs": "^4.10.0",
+    "array-to-image": "^1.0.0",
+    "axios": "^1.4.0",
+    "copy-webpack-plugin": "^11.0.0",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^5.3.0",
+    "fs": "^0.0.1-security",
+    "lodash": "^4.17.21",
+    "ndarray": "^1.0.19",
+    "ndarray-ops": "^1.2.2",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "onnxruntime-web": "^1.15.1",
+    "photoswipe": "^5.3.8",
+    "prebuild-install": "^7.1.1",
     "react": "^18.2.0",
     "react-datepicker": "^4.11.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.9",
-    "react-router-dom": "^6.8.1"
+    "react-photoswipe-gallery": "^2.2.7",
+    "react-responsive-carousel": "^3.2.23",
+    "react-router-dom": "^6.8.1",
+    "react-slick": "^0.29.0"
   },
   "devDependencies": {
     "@electron/notarize": "^1.2.3",
@@ -114,9 +135,12 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@types/jest": "^29.5.1",
+    "@types/lodash": "^4.14.196",
+    "@types/ndarray-ops": "^1.2.4",
     "@types/node": "18.16.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.1",
+    "@types/react-slick": "^0.23.10",
     "@types/react-test-renderer": "^18.0.0",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
@@ -153,6 +177,7 @@
     "jest": "^29.4.2",
     "jest-environment-jsdom": "^29.4.2",
     "mini-css-extract-plugin": "^2.7.2",
+    "node-loader": "^2.0.0",
     "postcss": "^8.4.23",
     "postcss-loader": "^7.3.0",
     "prettier": "^2.8.4",
