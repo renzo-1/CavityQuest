@@ -38,50 +38,52 @@ class PatientsViewset(viewsets.ModelViewSet):
     def create(self, request, format=None):
         patient_data = request.data.copy()
         image_uploads = request.FILES.getlist('image_uploads[]')
-        print(image_uploads)
         serializer = self.get_serializer(data=patient_data)
 
         if serializer.is_valid():
             serializer.save()
             headers = self.get_success_headers(serializer.data)
-            if image_uploads:
+            if len(image_uploads) > 0:
                 patient = serializer.instance
                 for img in image_uploads:
                     ImageUpload.objects.create(patient=patient, image=img)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST, headers=headers)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
         patientInstance = get_object_or_404(self.get_queryset(), pk=pk)
         new_image_uploads = []
+
         try:
             new_image_uploads = request.data.getlist('new_image_uploads[]')
         except:
             pass
 
-        if len(new_image_uploads) > 0:
-            for i, file in enumerate(new_image_uploads):
-                newFile = base64_file(file, f'detection{i}')
-                print('file', newFile)
+        try:
+            if len(new_image_uploads) > 0:
+                print('hello')
+                for i, file in enumerate(new_image_uploads):
+                    newFile = base64_file(file, f'detection{i}')
+                    print('file', newFile)
 
-                ImageUpload.objects.create(
-                    patient=patientInstance, image=newFile)
+                    ImageUpload.objects.create(
+                        patient=patientInstance, image=newFile)
 
-            headers = self.get_success_headers(self.get_serializer)
-            return Response('Image upload success', status=status.HTTP_202_ACCEPTED, headers=headers)
+                headers = self.get_success_headers(self.get_serializer)
+                return Response('Image upload success', status=status.HTTP_202_ACCEPTED, headers=headers)
 
-        data = request.data.copy()
-
-        if data['doctors_note']:
-            serializer = self.get_serializer(
-                patientInstance, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            headers = self.get_success_headers(self.get_serializer)
-            return Response('Edit succes', status=status.HTTP_202_ACCEPTED, headers=headers)
-
-        else:
+            else:
+                data = request.data
+                print(data)
+                serializer = self.get_serializer(
+                    patientInstance, data=data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                print('hello1')
+                serializer.save()
+                headers = self.get_success_headers(self.get_serializer)
+                return Response('Edit succes', status=status.HTTP_202_ACCEPTED, headers=headers)
+        except:
             return Response({'message': 'Error editing patient data.'}, status=status.HTTP_400_BAD_REQUEST)
 
 

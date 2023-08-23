@@ -51,7 +51,7 @@ const Records = () => {
             <h3 className="font-bold">Treatment</h3>
           </div>
           {patientData &&
-            patientData.map(({ id, fullName, dateAdded, dateModified }) => (
+            patientData.map(({ id, fullName, dateAdded, treatments }) => (
               <div
                 key={`a${id}`}
                 className="grid grid-cols-3 border-b mt-8 cursor-pointer"
@@ -63,6 +63,7 @@ const Records = () => {
                       id={Number(id)}
                       fullName={fullName}
                       dateAdded={dateAdded}
+                      treatments={treatments}
                     />
                   )
                 ) : (
@@ -70,6 +71,7 @@ const Records = () => {
                     id={Number(id)}
                     fullName={fullName}
                     dateAdded={dateAdded}
+                    treatments={treatments}
                   />
                 )}
               </div>

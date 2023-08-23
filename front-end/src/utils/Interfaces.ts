@@ -32,6 +32,7 @@ interface PatientData {
   gender: GenderEnum;
   imageUploads: FileList | ImageUpload[];
   doctorsNote?: string;
+  treatments?: string[];
   dateAdded?: Date;
   dateModified?: Date;
 }
@@ -47,6 +48,7 @@ interface responseData {
   contact_number: string;
   image_uploads: ImageUpload[];
   doctors_note?: string;
+  treatments?: string[];
   date_added: Date;
   date_modified: Date;
 }

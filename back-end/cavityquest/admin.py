@@ -11,7 +11,7 @@ class ImageUploadInline(admin.TabularInline):
 
 class PatientAdmin(admin.ModelAdmin):
     list_display = ('id', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'address', 'contact_number',
-                    'date_added', 'date_modified', 'doctors_note', 'image_uploads')
+                    'date_added', 'date_modified', 'doctors_note', 'treatments')
     inlines = [ImageUploadInline]
 
 

@@ -64,7 +64,7 @@ const ShowImageRecords = ({ id }: Props) => {
               <div className="space-y-4 z-20 pt-10" key={date}>
                 <div className="flex items-center justify-center space-x-8">
                   <h1 className="relative text-xl font-bold inline-block w-fit whitespace-nowrap ">
-                    {formatDate(date)}
+                    {formatDate(date )}
                   </h1>
                   <hr className="inline-block w-full border-0 border-t border-black"></hr>
                 </div>

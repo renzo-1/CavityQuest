@@ -3,7 +3,7 @@ import { detection, records, closeBtn } from '../../assets';
 import { PatientForm } from 'components';
 import { useNavigate } from 'react-router-dom';
 const Menu = () => {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState<boolean>(false);
   const navigate = useNavigate();
   const handleClick = (e: MouseEvent): void => {
     setShow((prev) => !prev);
@@ -11,24 +11,7 @@ const Menu = () => {
 
   return (
     <>
-      {show && (
-        <div className="py-8 px-10 absolute w-[50rem] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-myGray rounded-lg z-30">
-          <div className="flex justify-between">
-            <h1 className='font-bold before:content[""] before:absolute before:w-8 before:border-b-4 before:border-black before:h-7'>
-              Patient Form
-            </h1>
-            <button>
-              <img
-                src={closeBtn}
-                alt="close button"
-                onClick={() => setShow((prev) => !prev)}
-              />
-            </button>
-          </div>
-
-          <PatientForm />
-        </div>
-      )}
+      {show && <PatientForm setShow={setShow} />}
 
       {show && (
         <div className="bg-black absolute w-full opacity-50 min-h-screen h-full z-1"></div>

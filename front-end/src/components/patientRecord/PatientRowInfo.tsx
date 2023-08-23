@@ -5,10 +5,12 @@ const PatientRowInfo = ({
   id,
   fullName,
   dateAdded,
+  treatments,
 }: {
   id: number;
   fullName?: string;
   dateAdded?: Date;
+  treatments?: string[];
 }) => {
   const navigate = useNavigate();
 
@@ -20,6 +22,15 @@ const PatientRowInfo = ({
       </div>
 
       <p>{dateAdded?.toString()}</p>
+      <ul className="flex space-x-3 flex-wrap">
+        {treatments &&
+          treatments.length > 0 &&
+          treatments.map((treatments) => (
+            <li key={treatments}>
+              <p>&#x2022; {treatments}</p>
+            </li>
+          ))}
+      </ul>
     </>
   );
 };

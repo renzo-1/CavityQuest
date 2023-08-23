@@ -45,7 +45,7 @@ const Detection = () => {
       .then((res) => {
         console.log(res);
         setIsNewData((prev) => !prev);
-        // navigate();
+        navigate(`/records/${id}`);
       })
       .catch((err) => console.log(err));
   };
