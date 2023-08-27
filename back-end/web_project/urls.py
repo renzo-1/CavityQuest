@@ -23,8 +23,9 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r'image_uploads', views.ImageUploadViewSet)
-router.register(r'patients', views.PatientsViewset)
-
+router.register(r'patients', views.PatientsViewSet)
+router.register(r'clinics', views.ClinicViewSet)
+router.register(r'dentists', views.DentistViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
