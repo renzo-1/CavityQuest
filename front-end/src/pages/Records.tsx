@@ -10,13 +10,9 @@ import { PatientRowInfo } from 'components';
 const Records = () => {
   const [searchedName, setSearchedName] = useState<string>('');
   const navigate = useNavigate();
-  const { patientData } = useAppContext() as PatientDataContextType;
+  const { patientData, currClinic, setCurrPatient } =
+    useAppContext() as PatientDataContextType;
   const [localData, setLocalData] = useState<any>();
-
-  useEffect(() => {
-    setLocalData(patientData);
-    console.log('recs', patientData);
-  }, [patientData]);
 
   if (patientData)
     return (
@@ -51,27 +47,31 @@ const Records = () => {
             <h3 className="font-bold">Treatment</h3>
           </div>
           {patientData &&
-            patientData.map(({ id, fullName, dateAdded, treatments }) => (
+            patientData.length > 0 &&
+            patientData.map((patient) => (
               <div
-                key={`a${id}`}
+                key={patient.id}
                 className="grid grid-cols-3 border-b mt-8 cursor-pointer"
-                onClick={() => navigate(`/records/${id}`)}
+                onClick={() => {
+                  setCurrPatient(patient);
+                  navigate(`/${currClinic}/records/${patient.id}`);
+                }}
               >
                 {searchedName.length > 1 ? (
-                  fullName?.match(new RegExp(searchedName, 'gi')) && (
+                  patient.fullName?.match(new RegExp(searchedName, 'gi')) && (
                     <PatientRowInfo
-                      id={Number(id)}
-                      fullName={fullName}
-                      dateAdded={dateAdded}
-                      treatments={treatments}
+                      id={Number(patient.id)}
+                      fullName={patient.fullName}
+                      dateAdded={patient.dateAdded}
+                      treatments={patient.treatments}
                     />
                   )
                 ) : (
                   <PatientRowInfo
-                    id={Number(id)}
-                    fullName={fullName}
-                    dateAdded={dateAdded}
-                    treatments={treatments}
+                    id={Number(patient.id)}
+                    fullName={patient.fullName}
+                    dateAdded={patient.dateAdded}
+                    treatments={patient.treatments}
                   />
                 )}
               </div>

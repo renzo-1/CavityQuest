@@ -3,20 +3,26 @@ import { WebcamOps } from '../utils/webcam';
 import '../styles/App.css';
 import { BackButton, Carousel, Detection as Detect } from 'components';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType, ImageUpload } from 'utils/Interfaces';
+import {
+  PatientDataContextType,
+  ImageUpload,
+  PatientDataKind,
+} from 'utils/Interfaces';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { json } from 'stream/consumers';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Detection = () => {
   const { id } = useParams();
-  const { currPatient, setIsNewData } =
+  const { currPatient, setIsNewData, currClinic, dispatchPatientData } =
     useAppContext() as PatientDataContextType;
   const videoRef = useRef<HTMLVideoElement>(null);
   const webcamOps = new WebcamOps();
   const [captures, setCaptures] = useState<string[]>([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+
   const handleSubmit = () => {
     // const dateNow = Date.now();
 
@@ -36,47 +42,91 @@ const Detection = () => {
 
     console.log(formData);
 
-    // formData.append('image_uploads', [...currPatient!.imageUploads, 'asd']);
-
     axios
       .patch(`http://localhost:8000/api/patients/${id}/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       .then((res) => {
-        console.log(res);
-        setIsNewData((prev) => !prev);
-        navigate(`/records/${id}`);
+        const imageUploads: ImageUpload[] = [];
+        const newData = JSON.parse(res.data);
+
+        axios
+          .get(`http://localhost:8000/api/image_uploads/`)
+          .then((res) => {
+            const { data } = res;
+
+            data.map(
+              (img: any) =>
+                img?.patient == currPatient?.id && imageUploads.push(img)
+            );
+
+            dispatchPatientData({
+              type: PatientDataKind.UPDATE,
+              payload: {
+                patientData: [
+                  {
+                    ...newData[0].fields,
+                    id: currPatient?.id,
+                    image_uploads: imageUploads,
+                  },
+                ],
+                currPatient: currPatient?.id,
+              },
+            });
+
+            toast.success('Successfully saved', {
+              autoClose: 5000,
+            });
+            navigate(`/${currClinic}/records/${id}`);
+          })
+          .then((err) =>
+            toast.error(
+              'There was an error retreiving the record. Please try again',
+              {
+                autoClose: 5000,
+              }
+            )
+          );
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        toast.error('There was an error saving the record. Please try again', {
+          autoClose: 5000,
+        });
+      });
   };
 
   return (
-    <div className="p-10 h-screen relative w-full">
-      <div
-        className="flex z-30"
-        onClick={() => {
-          webcamOps.close(videoRef);
-          setCaptures([]);
-        }}
-      >
-        <BackButton />
-      </div>
-      <Detect
-        videoRef={videoRef}
-        captures={captures}
-        handleSubmit={handleSubmit}
-        setCaptures={setCaptures}
-        setIsGalleryOpen={setIsGalleryOpen}
-      />
+    <>
+      <ToastContainer />
 
-      {isGalleryOpen && (
-        <Carousel
-          images={captures}
-          setImages={setCaptures}
+      <div className="p-10 h-screen relative w-full">
+        <div
+          className="flex z-30"
+          onClick={() => {
+            webcamOps.close(videoRef);
+            setCaptures([]);
+          }}
+        >
+          <BackButton />
+        </div>
+        <Detect
+          videoRef={videoRef}
+          captures={captures}
+          handleSubmit={handleSubmit}
+          setCaptures={setCaptures}
           setIsGalleryOpen={setIsGalleryOpen}
         />
-      )}
-    </div>
+
+        {isGalleryOpen && (
+          <Carousel
+            images={captures}
+            setImages={setCaptures}
+            setIsGalleryOpen={setIsGalleryOpen}
+          />
+        )}
+      </div>
+    </>
   );
 };
 

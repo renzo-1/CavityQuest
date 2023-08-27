@@ -13,7 +13,7 @@ const Landing = () => {
   return (
     <>
       {showBrand && (
-        <main className="absolute z-50 grid items-center h-full w-full bg-gradient-to-r from-cyan-500 to-blue-500 fade-animate">
+        <main className="absolute z-[100] grid items-center h-full w-full bg-gradient-to-r from-cyan-500 to-blue-500 fade-animate">
           <div className="text-center">
             <h1 className="text-7xl font-bold mb-4 text-white">Cavity Quest</h1>
             <p className="text-xl  text-white">

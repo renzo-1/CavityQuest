@@ -6,6 +6,7 @@ import PatientSearch from './patientRecord/PatientSearch';
 import Detection from './Detection';
 import PatientRowInfo from './patientRecord/PatientRowInfo';
 import Carousel from './Carousel';
+import ClinicForm from './ClinicForm';
 export {
   BackButton,
   FormFieldError,
@@ -15,4 +16,5 @@ export {
   Detection,
   PatientRowInfo,
   Carousel,
+  ClinicForm,
 };

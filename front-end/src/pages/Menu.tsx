@@ -1,37 +1,78 @@
-import React, { MouseEvent, useState } from 'react';
+import React, {
+  MouseEvent,
+  useState,
+  ChangeEvent,
+  useEffect,
+  memo,
+} from 'react';
 import { detection, records, closeBtn } from '../../assets';
 import { PatientForm } from 'components';
 import { useNavigate } from 'react-router-dom';
+import { ClinicForm } from 'components';
+import { useAppContext } from 'features/AppContext';
+import { PatientDataContextType } from 'utils/Interfaces';
+
 const Menu = () => {
-  const [show, setShow] = useState<boolean>(false);
+  const [showPatientForm, setShowPatientForm] = useState<boolean>(false);
+  const { currClinic, setCurrClinic, clinics, dentists } =
+    useAppContext() as PatientDataContextType;
   const navigate = useNavigate();
+
   const handleClick = (e: MouseEvent): void => {
-    setShow((prev) => !prev);
+    setShowPatientForm((prev) => !prev);
   };
 
   return (
     <>
-      {show && <PatientForm setShow={setShow} />}
+      {/* {showClinicForm && <ClinicForm setShowClinicForm={setShowClinicForm} />} */}
 
-      {show && (
-        <div className="bg-black absolute w-full opacity-50 min-h-screen h-full z-1"></div>
+      {showPatientForm && <PatientForm setShow={setShowPatientForm} />}
+
+      <div className="w-full h-1/2 absolute top-0 left-0 bg-[url('../../assets/bg2.jpg')] bg-[0rem_-55rem] brightness-50 shadow-lg bg-cover bg-no-repeat z-20"></div>
+      <ClinicForm />
+      {/* <div className="absolute top-0 left-0 w-full z-20 flex justify-end p-10 space-x-8 text-lg font-bold">
+        <select
+          onChange={handleClinicChange}
+          className="rounded-lg px-4 py-2 bg-black bg-opacity-50 shadow-md text-white bg-[right_1rem_center]"
+        >
+          {clinics.map((clinic) => {
+            if (currClinic == clinic.id) {
+              return (
+                <option
+                  selected
+                  className="text-white  text-lg"
+                  value={clinic.id}
+                >
+                  {clinic.name}
+                </option>
+              );
+            } else {
+              return (
+                <option className="text-white  text-lg" value={clinic.id}>
+                  {clinic.name}
+                </option>
+              );
+            }
+          })}
+        </select>
+      </div> */}
+      {showPatientForm && (
+        <div className="bg-black absolute top-0 left-0 w-full opacity-50 h-screen z-20"></div>
       )}
-
-      <div className="h-full w-full border flex justify-center items-center space-x-20 relative">
-        <div className="w-full h-1/2 absolute top-0 left-0 bg-[url('../../assets/bg2.jpg')] bg-[0rem_-55rem] brightness-50 shadow-lg bg-cover bg-no-repeat "></div>
+      <div className="h-full w-full flex justify-center items-center space-x-20 z-40">
         <button
-          className="h-full px-14 max-h-60 bg-primary rounded-lg space-y-8 shadow-lg z-20"
+          className="px-14 h-full max-h-[250px] bg-primary rounded-lg space-y-8 shadow-lg z-20"
           onClick={handleClick}
         >
           <img className="w-24" src={detection} alt="detection" />
           <h2 className="text-white font-bold tracking-wider">Detect</h2>
         </button>
-        <button className="h-full px-14 max-h-60 bg-blue-500 rounded-lg space-y-8 shadow-lg z-20">
+        <button className="px-14 h-full max-h-[250px] bg-blue-500 rounded-lg space-y-8 shadow-lg z-20">
           <img
             className="w-24"
             src={records}
             alt="records"
-            onClick={() => navigate('/records')}
+            onClick={() => navigate(`/${currClinic}/records`)}
           />
           <h2 className="text-white font-bold tracking-wider">Records</h2>
         </button>

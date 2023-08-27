@@ -26,6 +26,8 @@ interface PatientData {
   firstName: string;
   middleName: string;
   lastName: string;
+  clinic: number;
+  dentist: number;
   dateOfBirth: Date;
   address: string;
   contact: string;
@@ -37,27 +39,73 @@ interface PatientData {
   dateModified?: Date;
 }
 
-interface responseData {
+interface PatientResponseData {
   id: string | number;
   last_name: string;
   first_name: string;
   middle_name: string;
+  clinic: number;
   address: string;
   gender: GenderEnum;
   date_of_birth: Date;
   contact_number: string;
-  image_uploads: ImageUpload[];
+  image_uploads: FileList | ImageUpload[];
   doctors_note?: string;
   treatments?: string[];
+  dentist: number;
   date_added: Date;
   date_modified: Date;
 }
 
-type PatientDataContextType = {
+interface ClinicProps {
+  id: number;
+  name: string;
+}
+
+interface ClinicProps {
+  id: number;
+  name: string;
+}
+interface DentistProps {
+  id: number;
+  name: string;
+  clinic: number;
+}
+enum PatientDataKind {
+  READ = 'READ',
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}
+
+interface PatientDataAction {
+  type: PatientDataKind;
+  payload: {
+    patientData: PatientResponseData[];
+    currPatient?: number | string;
+  };
+}
+
+interface PatientDataContextType {
   patientData: PatientData[];
   setPatientData: Dispatch<SetStateAction<PatientData[]>>;
+  dispatchPatientData: Dispatch<PatientDataAction>;
   setIsNewData: Dispatch<SetStateAction<Boolean>>;
   currPatient: PatientData | undefined;
   setCurrPatient: Dispatch<SetStateAction<PatientData | undefined>>;
+  setCurrClinic: Dispatch<SetStateAction<number | undefined>>;
+  currClinic?: number;
+  dentists: DentistProps[];
+  setDentists: Dispatch<SetStateAction<DentistProps[]>>;
+  clinics: ClinicProps[];
+}
+export {
+  PatientData,
+  PatientResponseData,
+  PatientDataContextType,
+  ImageUpload,
+  DentistProps,
+  ClinicProps,
+  PatientDataKind,
+  PatientDataAction,
 };
-export { PatientData, responseData, PatientDataContextType, ImageUpload };

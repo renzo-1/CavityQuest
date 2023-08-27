@@ -8,7 +8,10 @@ import cloudBtn from './icons/cloud-btn.png';
 import closeBtn from './icons/x-lg.svg';
 import detectionSample from './DetectionSample.png';
 import arrow from './icons/arrow-right-circle-fill.svg';
-import trash from './icons/trash.svg'
+import trash from './icons/trash.svg';
+import plus from './icons/plus.svg';
+import plusWhite from './icons/plus-white.svg';
+import check from './icons/check.svg';
 export {
   detection,
   records,
@@ -19,5 +22,8 @@ export {
   closeBtn,
   detectionSample,
   arrow,
-  trash
+  trash,
+  plus,
+  plusWhite,
+  check,
 };

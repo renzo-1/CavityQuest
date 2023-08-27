@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton, PatientInfoField } from 'components';
 import { PatientDataContextType } from 'utils/Interfaces';
 import ShowImageRecords from 'components/patientRecord/ShowImageRecords';
-import DeleteRecord from 'components/DeleteRecord';
+import DeleteRecord from 'components/patientRecord/DeleteRecord';
 import EditRecord from 'components/patientRecord/EditRecord';
 import { useAppContext } from 'features/AppContext';
 
 const ShowPatientInfo = () => {
   const navigate = useNavigate();
   const { id: idParam } = useParams();
-  const { patientData, setCurrPatient, currPatient } =
+  const { patientData, setCurrPatient, currClinic, currPatient } =
     useAppContext() as PatientDataContextType;
   const [isDeleting, setIsDeleting] = useState<Boolean>(false);
 
@@ -34,7 +34,7 @@ const ShowPatientInfo = () => {
             </button>
             <button
               onClick={() => {
-                navigate(`/detection/${idParam}`);
+                navigate(`/${currClinic}/detection/${idParam}`);
               }}
               className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg"
             >

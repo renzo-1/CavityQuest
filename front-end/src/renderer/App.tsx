@@ -10,10 +10,14 @@ export default function App() {
         <Landing />
         <Router>
           <Routes>
-            <Route path="/" element={<Menu />} />
+            {/* <Route path="/" element={<Menu />} />
             <Route path="/detection/:id" element={<Detection />} />
             <Route path="/records" element={<Records />} />
-            <Route path="/records/:id" element={<ShowPatientInfo />} />
+            <Route path="/records/:id" element={<ShowPatientInfo />} /> */}
+            <Route path="/:clinic?" element={<Menu />} />
+            <Route path="/:clinic/detection/:id" element={<Detection />} />
+            <Route path="/:clinic/records" element={<Records />} />
+            <Route path="/:clinic/records/:id" element={<ShowPatientInfo />} />
           </Routes>
         </Router>
       </AppProvider>

@@ -8,19 +8,20 @@ import React, {
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PatientData, PatientDataContextType } from 'utils/Interfaces';
+import { PatientData, PatientDataContextType, PatientDataKind } from 'utils/Interfaces';
 import { useAppContext } from 'features/AppContext';
 import { treatments } from 'data/treatments';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface EditProps {
+  dentist: number;
   doctorsNote?: string;
-  treatments?: string[];
+  treatments?: string[] | null;
 }
 const EditRecord = () => {
   const { id: idParam } = useParams();
-  const { setIsNewData, currPatient } =
+  const { setIsNewData, currPatient, setPatientData, dispatchPatientData,dentists } =
     useAppContext() as PatientDataContextType;
   const [checkboxValues, setCheckboxValues] = useState<string[]>(
     currPatient?.treatments! || []
@@ -36,13 +37,13 @@ const EditRecord = () => {
     setValue,
   } = useForm<EditProps>({
     defaultValues: {
+      dentist: currPatient?.dentist,
       doctorsNote: currPatient?.doctorsNote,
       treatments: currPatient?.treatments,
     },
   });
-
   useEffect(() => {
-    setCheckboxValues(currPatient?.treatments! || []);
+    // setCheckboxValues(currPatient?.treatments! || []);
     setValue('doctorsNote', currPatient?.doctorsNote);
     setValue('treatments', currPatient?.treatments);
   }, [currPatient?.treatments, currPatient?.doctorsNote]);
@@ -56,7 +57,43 @@ const EditRecord = () => {
           treatments: JSON.stringify(data.treatments),
         })
         .then((res) => {
-          setIsNewData((prev) => !prev);
+          // setPatientData((prevData) => {
+          //   const newArr = prevData.filter(
+          //     (patient) => patient.id !== currPatient?.id
+          //   );
+
+          //   const newData = res.data;
+
+          //   const fullName =
+          //     newData.last_name +
+          //     ', ' +
+          //     newData.first_name +
+          //     ' ' +
+          //     newData.middle_name.charAt(0) +
+          //     '.';
+
+          //   const formattedData = {
+          //     id: newData.id,
+          //     fullName,
+          //     firstName: newData.first_name,
+          //     lastName: newData.last_name,
+          //     middleName: newData.middle_name,
+          //     gender: newData.gender,
+          //     clinic: newData.clinic,
+          //     dentist: newData.dentist,
+          //     address: newData.address,
+          //     dateOfBirth: newData.date_of_birth,
+          //     contact: newData.contact_number,
+          //     imageUploads: newData.image_uploads,
+          //     doctorsNote: newData.doctors_note,
+          //     dateAdded: newData.date_added,
+          //     dateModified: newData.date_modified,
+          //     treatments: JSON.parse(newData.treatments),
+          //   };
+
+          //   return [...newArr, formattedData];
+          // });
+          dispatchPatientData({type: PatientDataKind.UPDATE, payload: {patientData: [res.data], currPatient: currPatient?.id}})
           setIsEdit(false);
           toast.success('Record successfully updated', {
             autoClose: 5000,
@@ -71,6 +108,7 @@ const EditRecord = () => {
           )
         );
     } else {
+      setIsEdit(false);
       console.log('no change');
     }
   };
@@ -103,6 +141,14 @@ const EditRecord = () => {
         className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2"
         onSubmit={handleSubmit(onSubmit)}
       >
+        <div className="flex justify-between mb-2">
+          {dentists.map(
+            (dentist) =>
+              dentist.id == currPatient?.dentist && <p>{dentist.name}</p>
+          )}
+          <p>{currPatient?.dentist}</p>
+        </div>
+
         <div className="flex justify-between mb-2">
           <h1 className="text-sm">Treatment</h1>
           {isEdit ? (
@@ -138,12 +184,12 @@ const EditRecord = () => {
             ))}
           </div>
         ) : (
-          <ul className="h-14 border rounded-lg mb-5 flex space-x-3 p-2 flex-wrap">
+          <ul className="min-h-14 border rounded-lg mb-5 flex space-x-3 p-2 flex-wrap">
             {checkboxValues &&
               checkboxValues.length > 0 &&
               checkboxValues.map((savedTreatment) => (
                 <li key={savedTreatment}>
-                  <p className="font-bold">&#x2022; {savedTreatment}</p>
+                  <p className="font-bold">&#x2022;{savedTreatment}</p>
                 </li>
               ))}
           </ul>
