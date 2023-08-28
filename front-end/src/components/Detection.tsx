@@ -16,6 +16,8 @@ import { renderBoxes } from '../utils/renderBox';
 import { non_max_suppression } from '../utils/nonMaxSuppression';
 // import '../styles/App.css';
 import { BackButton } from 'components';
+import { useNavigate } from 'react-router-dom';
+import { bool } from '@techstark/opencv-js';
 function shortenedCol(arrayofarray: any, indexlist: any) {
   return arrayofarray.map(function (array: number[]) {
     return indexlist.map(function (idx: number) {
@@ -37,9 +39,11 @@ const Detection = ({
   setCaptures: Dispatch<SetStateAction<string[]>>;
   setIsGalleryOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState({ loading: true, progress: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLCanvasElement>(null);
+  const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>();
   const model_dim: [number, number] = [640, 640];
   const w = 640;
@@ -97,6 +101,10 @@ const Detection = ({
     const mainCanvas = canvasRef.current!;
 
     if (!mainCanvas) return;
+    setIsCapturing(true);
+    setTimeout(() => {
+      setIsCapturing(false);
+    }, 10);
     const w = mainCanvas.width;
     const h = mainCanvas.height;
 
@@ -152,55 +160,88 @@ const Detection = ({
   }, []);
   console.warn = () => {};
 
+  window.addEventListener('keydown', (event) => {
+    if (event.code == 'Space') capture();
+  });
+  const handleCloseCam = () => {
+    webcamOps.close(videoRef);
+    setCaptures([]);
+  };
   return (
-    <div className="space-y-10 flex justify-center items-center flex-col">
-      {loading.loading ? (
-        <Loader>Loading model... {(loading.progress * 100).toFixed(2)}%</Loader>
-      ) : (
-        <p> </p>
-      )}
-      <div className={`w-${w}px h-${h}px relative border flex justify-center`}>
-        <div className={`min-h-fit min-w-fit w-${w}px h-${h}px bg-gray-500`}>
-          <video
-            className={`max-h-[${h}px]  max-w-[${w}px] `}
-            autoPlay
-            playsInline
-            muted
-            ref={videoRef}
-            id="frame"
-          />
-          <canvas
-            className={`absolute top-0 left-0 h-full w-full`}
-            ref={canvasRef}
-          />
-          <canvas className={`absolute top-0 left-0`} ref={boxRef} />
+    <>
+      <div className="flex z-30 w-full justify-between">
+        <div onClick={handleCloseCam}>
+          <BackButton />
+        </div>
+        <div>
+          <button
+            onClick={() => navigate(-1)}
+            className="font-bold text-xl px-4 py-2"
+          >
+            Skip
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="bg-primary font-bold text-white text-xl px-4 py-2 rounded-lg shadow-md"
+          >
+            Done
+          </button>
         </div>
       </div>
 
-      <div className="w-full relative  flex justify-center space-x-10">
-        <button
-          onClick={capture}
-          className="border-4 border-dashed font-bold border-gray-400 text-black text-2xl px-4 py-2 rounded-xl"
-        >
-          Capture photo
-        </button>
-
-        <div
-          className="w-[100px] h-[60px] border rounded-xl border-gray-200 overflow-hidden cursor-pointer"
-          onClick={() => setIsGalleryOpen(true)}
-        >
-          {captures[0] && (
-            <img
-              src={captures[0]}
-              className="w-[100px] h-[50px] object-cover  cursor-pointer"
-            ></img>
-          )}
+      <div className="space-y-10 flex justify-center items-center flex-col">
+        {loading.loading ? (
+          <>
+            <Loader>
+              Loading model... {(loading.progress * 100).toFixed(2)}%
+            </Loader>
+          </>
+        ) : (
+          <p> </p>
+        )}
+        <div className={`relative flex justify-center bg-gray-500`}>
+          <div className={`min-h-fit min-w-fit`}>
+            {isCapturing && (
+              <div className="w-full h-full bg-white opacity-80 absolute top-0 left-0 "></div>
+            )}
+            <video
+              className={`max-h-[${h}px]  max-w-[${w}px]`}
+              autoPlay
+              playsInline
+              muted
+              ref={videoRef}
+              id="frame"
+            />
+            <canvas
+              className="absolute top-0 left-0 w-full h-full"
+              ref={canvasRef}
+            />
+            <canvas className="absolute top-0 left-0" ref={boxRef} />
+          </div>
         </div>
-        <button onClick={handleSubmit} className="bg-primary font-bold text-white text-2xl px-4 py-2 rounded-xl">
-          Done
-        </button>
+
+        <div className="w-full relative  flex justify-center space-x-10">
+          <button
+            onClick={capture}
+            className="border-2 border-dashed font-bold border-gray-400 text-black text-2xl px-4 py-2 rounded-xl"
+          >
+            Capture
+          </button>
+
+          <div
+            className="w-[100px] h-[60px] border rounded-xl border-gray-200 overflow-hidden cursor-pointer"
+            onClick={() => setIsGalleryOpen(true)}
+          >
+            {captures[0] && (
+              <img
+                src={captures[0]}
+                className="object-cover  cursor-pointer"
+              ></img>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

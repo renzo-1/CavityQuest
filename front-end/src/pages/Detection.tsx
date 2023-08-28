@@ -77,6 +77,7 @@ const Detection = () => {
             toast.success('Successfully saved', {
               autoClose: 5000,
             });
+            webcamOps.close(videoRef);
             navigate(`/${currClinic}/records/${id}`);
           })
           .then((err) =>
@@ -101,15 +102,6 @@ const Detection = () => {
       <ToastContainer />
 
       <div className="p-10 h-screen relative w-full">
-        <div
-          className="flex z-30"
-          onClick={() => {
-            webcamOps.close(videoRef);
-            setCaptures([]);
-          }}
-        >
-          <BackButton />
-        </div>
         <Detect
           videoRef={videoRef}
           captures={captures}

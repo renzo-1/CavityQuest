@@ -93,7 +93,7 @@ const Carousel = ({
                 </div>
               )}
               <img
-                className={`-translate-x-[${rightPos.toString()}px] transition-all`}
+                className={`translate-x-[-${rightPos}px] transform-gpu transition-all w-[640px] h-[640px]`}
                 src={image}
                 alt="detection image"
               ></img>

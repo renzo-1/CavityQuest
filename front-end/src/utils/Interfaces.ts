@@ -21,8 +21,8 @@ interface ImageUpload extends File {
 }
 
 interface PatientData {
-  id?: string | number;
-  fullName?: string;
+  id: string | number;
+  fullName: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -35,7 +35,7 @@ interface PatientData {
   imageUploads: FileList | ImageUpload[];
   doctorsNote?: string;
   treatments?: string[];
-  dateAdded?: Date;
+  dateAdded: Date;
   dateModified?: Date;
 }
 
@@ -99,6 +99,22 @@ interface PatientDataContextType {
   setDentists: Dispatch<SetStateAction<DentistProps[]>>;
   clinics: ClinicProps[];
 }
+interface accessor {
+  [accessor: string]: string | number | string[];
+}
+type tableData = {
+  id: number | string;
+  fullName: string;
+  dateAdded: string;
+  treatments: string[];
+};
+interface columns {
+  accessor: string;
+  sortbyOrder?: 'asc' | 'desc';
+  label: string;
+  sortable: boolean;
+}
+
 export {
   PatientData,
   PatientResponseData,
@@ -108,4 +124,6 @@ export {
   ClinicProps,
   PatientDataKind,
   PatientDataAction,
+  tableData,
+  columns,
 };

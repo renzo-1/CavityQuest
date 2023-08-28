@@ -8,7 +8,11 @@ import React, {
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PatientData, PatientDataContextType, PatientDataKind } from 'utils/Interfaces';
+import {
+  PatientData,
+  PatientDataContextType,
+  PatientDataKind,
+} from 'utils/Interfaces';
 import { useAppContext } from 'features/AppContext';
 import { treatments } from 'data/treatments';
 import { ToastContainer, toast } from 'react-toastify';
@@ -21,7 +25,7 @@ interface EditProps {
 }
 const EditRecord = () => {
   const { id: idParam } = useParams();
-  const { setIsNewData, currPatient, setPatientData, dispatchPatientData,dentists } =
+  const { currPatient, dispatchPatientData, currClinic, dentists, clinics } =
     useAppContext() as PatientDataContextType;
   const [checkboxValues, setCheckboxValues] = useState<string[]>(
     currPatient?.treatments! || []
@@ -93,7 +97,10 @@ const EditRecord = () => {
 
           //   return [...newArr, formattedData];
           // });
-          dispatchPatientData({type: PatientDataKind.UPDATE, payload: {patientData: [res.data], currPatient: currPatient?.id}})
+          dispatchPatientData({
+            type: PatientDataKind.UPDATE,
+            payload: { patientData: [res.data], currPatient: currPatient?.id },
+          });
           setIsEdit(false);
           toast.success('Record successfully updated', {
             autoClose: 5000,
@@ -138,15 +145,28 @@ const EditRecord = () => {
   return (
     <>
       <form
-        className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2"
+        className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2 space-y-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex justify-between mb-2">
-          {dentists.map(
-            (dentist) =>
-              dentist.id == currPatient?.dentist && <p>{dentist.name}</p>
-          )}
-          <p>{currPatient?.dentist}</p>
+        <div className="mb-2 justify-between flex">
+          <div>
+            <h3 className="text-sm">Dentist</h3>
+            {dentists.map(
+              (dentist) =>
+                dentist.id == currPatient?.dentist && (
+                  <p className="font-bold text-xl rounded-lg">{dentist.name}</p>
+                )
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm">Clinic</h3>
+            {clinics.map(
+              (clinic) =>
+                clinic.id == currPatient?.clinic && (
+                  <p className="font-bold text-xl rounded-lg">{clinic.name}</p>
+                )
+            )}
+          </div>
         </div>
 
         <div className="flex justify-between mb-2">

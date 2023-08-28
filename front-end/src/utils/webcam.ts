@@ -17,24 +17,29 @@ export class WebcamOps {
     videoRef: React.MutableRefObject<HTMLVideoElement | null | undefined>,
     onLoaded: any
   ) => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: false,
-          video: {
-            facingMode: 'environment',
-          },
-        })
-        .then((stream) => {
-          window.localStream = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.onloadedmetadata = () => {
-              onLoaded();
-            };
-          }
-        });
-    } else alert("Can't open Webcam!");
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices
+          .getUserMedia({
+            audio: false,
+            video: {
+              facingMode: 'environment',
+            },
+          })
+          .then((stream) => {
+            window.localStream = stream;
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.onloadedmetadata = () => {
+                onLoaded();
+              };
+            }
+          });
+      }
+      
+    } catch (err) {
+      alert("Can't open Webcam!");
+    }
   };
 
   /**
@@ -49,7 +54,7 @@ export class WebcamOps {
       window.localStream.getTracks().forEach((track: any) => {
         track.stop();
       });
-      console.log('webcam closed')
+      console.log('webcam closed');
     } else alert('Please open Webcam first!');
   };
 }

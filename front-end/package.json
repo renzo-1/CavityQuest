@@ -101,6 +101,9 @@
     }
   },
   "dependencies": {
+    "@faker-js/faker": "^8.0.2",
+    "@tanstack/match-sorter-utils": "^8.8.4",
+    "@tanstack/react-table": "^8.9.3",
     "@techstark/opencv-js": "^4.8.0-release.3",
     "@tensorflow/tfjs": "^4.10.0",
     "array-to-image": "^1.0.0",

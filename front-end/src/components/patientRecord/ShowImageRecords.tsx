@@ -10,6 +10,7 @@ import {
   PatientData,
   ImageUpload,
 } from 'utils/Interfaces';
+import formatDate from 'utils/formatDate';
 import { useAppContext } from 'features/AppContext';
 // array to set to array (function: get unique dates)
 const getUniqueDateRecords = (arr: PatientData | undefined) => {
@@ -31,23 +32,8 @@ const getUniqueDateRecords = (arr: PatientData | undefined) => {
 interface Props {
   id?: string;
 }
-function getMonthName(monthNumber: number) {
-  const date = new Date();
-  date.setMonth(monthNumber - 1);
 
-  return date.toLocaleString('en-US', { month: 'long' });
-}
 
-function formatDate(date: string) {
-  const dateObj = new Date(date);
-  const formatedDate =
-    getMonthName(dateObj.getMonth()) +
-    ' ' +
-    dateObj.getDate().toString() +
-    ', ' +
-    dateObj.getFullYear().toString();
-  return formatedDate;
-}
 
 const ShowImageRecords = ({ id }: Props) => {
   const { patientData, setCurrPatient, currPatient } =
@@ -94,7 +80,7 @@ const ShowImageRecords = ({ id }: Props) => {
                       return (
                         <img
                           key={index}
-                          className="rounded-lg w-full z-20 "
+                          className="rounded-lg z-20"
                           src={file.image}
                           alt="detection sample"
                         ></img>
