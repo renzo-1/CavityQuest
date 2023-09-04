@@ -1,6 +1,7 @@
 import { Data } from 'electron';
 import { Url } from 'url';
 import React, { Dispatch, SetStateAction } from 'react';
+import { DocumentReference } from 'firebase/firestore';
 enum GenderEnum {
   female = 'Female',
   male = 'Male',
@@ -8,17 +9,20 @@ enum GenderEnum {
 }
 declare global {
   interface File {
-    image: string;
-    date_created: Date;
-    patient: string;
+    createdOn: Date;
+    url: string;
   }
 }
 
 interface ImageUpload extends File {
-  date_created: Date;
-  patient: string;
-  image: string;
+  createdOn: any;
+  name: string;
+  url: string;
 }
+type Timestamp = {
+  nanoseconds: number;
+  seconds: number;
+};
 
 interface PatientData {
   id: string | number;
@@ -27,16 +31,35 @@ interface PatientData {
   middleName: string;
   lastName: string;
   clinic: number;
-  dentist: number;
-  dateOfBirth: Date;
+  dentist?: string;
+  dateOfBirth: string;
   address: string;
-  contact: string;
+  contactNumber: string;
   gender: GenderEnum;
-  imageUploads: FileList | ImageUpload[];
-  doctorsNote?: string;
+  imageUploads: ImageUpload[];
+  note?: string;
   treatments?: string[];
-  dateAdded: Date;
-  dateModified?: Date;
+  createdOn: Timestamp;
+}
+interface FormattedPatientData {
+  id: string;
+  fullName: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  clinic: string;
+  dentist: DocumentReference;
+  dateOfBirth: string;
+  address: string;
+  contactNumber: string;
+  gender: string;
+  imageUploads: ImageUpload[];
+  note: string;
+  treatments: string[];
+  createdOn: Timestamp;
+}
+interface CreatePatientData extends Omit<PatientData, 'imageUploads'> {
+  imageUploads: FileList | ImageUpload[];
 }
 
 interface PatientResponseData {
@@ -56,21 +79,17 @@ interface PatientResponseData {
   date_added: Date;
   date_modified: Date;
 }
-
-interface ClinicProps {
-  id: number;
-  name: string;
-}
-
-interface ClinicProps {
-  id: number;
-  name: string;
-}
 interface DentistProps {
-  id: number;
+  id: string;
   name: string;
-  clinic: number;
 }
+interface ClinicProps {
+  id: string;
+  name: string;
+  patients: string[];
+  dentists: string[];
+}
+
 enum PatientDataKind {
   READ = 'READ',
   CREATE = 'CREATE',
@@ -87,25 +106,30 @@ interface PatientDataAction {
 }
 
 interface PatientDataContextType {
-  patientData: PatientData[];
-  setPatientData: Dispatch<SetStateAction<PatientData[]>>;
-  dispatchPatientData: Dispatch<PatientDataAction>;
-  setIsNewData: Dispatch<SetStateAction<Boolean>>;
-  currPatient: PatientData | undefined;
-  setCurrPatient: Dispatch<SetStateAction<PatientData | undefined>>;
-  setCurrClinic: Dispatch<SetStateAction<number | undefined>>;
-  currClinic?: number;
-  dentists: DentistProps[];
-  setDentists: Dispatch<SetStateAction<DentistProps[]>>;
+  patientData: FormattedPatientData[];
+  setPatientData: Dispatch<SetStateAction<FormattedPatientData[]>>;
+  // dispatchPatientData: Dispatch<PatientDataAction>;
+  setShowClinics: Dispatch<SetStateAction<boolean>>;
+  showClinics: boolean;
+  currPatient: FormattedPatientData | undefined;
+  setCurrPatient: Dispatch<SetStateAction<FormattedPatientData | undefined>>;
+  setCurrClinic: Dispatch<SetStateAction<any>>;
+  currClinic: any;
+  dentists?: DentistProps[];
+  setDentists?: Dispatch<SetStateAction<DentistProps[] | undefined>>;
   clinics: ClinicProps[];
+  updateClinic: (newDataRef: any, field: string) => {};
+  getClinics: () => void;
+  getPatients: () => void;
+  getDentists: () => void;
+  deletePatientOnClinic: (newDataRef: DocumentReference) => void;
 }
-interface accessor {
-  [accessor: string]: string | number | string[];
-}
+
 type tableData = {
+  number: number | string;
   id: number | string;
   fullName: string;
-  dateAdded: string;
+  createdOn: string;
   treatments: string[];
 };
 interface columns {
@@ -116,6 +140,7 @@ interface columns {
 }
 
 export {
+  CreatePatientData,
   PatientData,
   PatientResponseData,
   PatientDataContextType,
@@ -126,4 +151,6 @@ export {
   PatientDataAction,
   tableData,
   columns,
+  Timestamp,
+  FormattedPatientData,
 };

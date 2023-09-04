@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import * as tf from '@tensorflow/tfjs';
 // import '@tensorflow/tfjs-backend-webgl'; // set backend to webgl
-import Loader from '../components/loader';
+import Loader from './Loader';
 import { WebcamOps } from '../utils/webcam';
 // import Webcam from 'react-webcam';
 
@@ -17,7 +17,7 @@ import { non_max_suppression } from '../utils/nonMaxSuppression';
 // import '../styles/App.css';
 import { BackButton } from 'components';
 import { useNavigate } from 'react-router-dom';
-import { bool } from '@techstark/opencv-js';
+
 function shortenedCol(arrayofarray: any, indexlist: any) {
   return arrayofarray.map(function (array: number[]) {
     return indexlist.map(function (idx: number) {
@@ -176,13 +176,13 @@ const Detection = ({
         <div>
           <button
             onClick={() => navigate(-1)}
-            className="font-bold text-xl px-4 py-2"
+            className="font-bold text-xl px-4 py-2 "
           >
             Skip
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-primary font-bold text-white text-xl px-4 py-2 rounded-lg shadow-md"
+            className="bg-primary font-bold text-white text-xl px-4 py-2 rounded-lg shadow-md transition-all duration-500 ease-out"
           >
             Done
           </button>

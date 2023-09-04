@@ -2,10 +2,12 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Landing, Menu, Detection, Records, ShowPatientInfo } from 'pages';
 import AppProvider from 'features/AppContext';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 export default function App() {
   return (
     <>
+      <ToastContainer />
       <AppProvider>
         <Landing />
         <Router>

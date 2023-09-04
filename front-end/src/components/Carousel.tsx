@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { arrow, closeBtn, trash } from '../../assets';
+import { arrow, closeBtn, trash } from '../assets';
 import { image } from '@tensorflow/tfjs';
 
 const Carousel = ({
@@ -60,10 +60,10 @@ const Carousel = ({
 
   return (
     <div className="absolute top-0 left-0 h-screen w-full border flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-[640px] h-[640px] border border-red-500 flex relative overflow-hidden">
+      <div className="w-[640px] h-[640px] border border-red-500 flex relative">
         <button
           onClick={closeCarousel}
-          className="z-50 absolute top-[5%] right-[5%]"
+          className="z-50 absolute top-[5%] right-[5%] transition-all duration-500 ease-out"
         >
           <img className="w-5" src={closeBtn} alt="close button"></img>
         </button>
@@ -74,7 +74,7 @@ const Carousel = ({
               {currIdx == idx && (
                 <button
                   onClick={() => deleteImage(idx)}
-                  className="z-50 absolute top-[5%] left-[5%]"
+                  className="z-50 absolute top-[5%] left-[5%] "
                 >
                   <img className="w-5" src={trash} alt="close button"></img>
                 </button>
@@ -93,7 +93,8 @@ const Carousel = ({
                 </div>
               )}
               <img
-                className={`translate-x-[-${rightPos}px] transform-gpu transition-all w-[640px] h-[640px]`}
+                className={`-translate-x-[${rightPos.toString()}px] transform transition-all w-[640px] h-[640px]`}
+                style={{ transform: `translate(-${rightPos.toString()}px)` }}
                 src={image}
                 alt="detection image"
               ></img>

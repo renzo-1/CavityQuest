@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton, PatientInfoField } from 'components';
 import { PatientDataContextType } from 'utils/Interfaces';
-import ShowImageRecords from 'components/patientRecord/ShowImageRecords';
-import DeleteRecord from 'components/patientRecord/DeleteRecord';
-import EditRecord from 'components/patientRecord/EditRecord';
+import ShowImageRecords from 'components/records/ShowImageRecords';
+import DeleteRecord from 'components/records/DeleteRecord';
+import EditRecord from 'components/records/EditRecord';
 import { useAppContext } from 'features/AppContext';
+import formatDate from 'utils/formatDate';
 
 const ShowPatientInfo = () => {
   const navigate = useNavigate();
@@ -21,13 +22,12 @@ const ShowPatientInfo = () => {
   return (
     <>
       {isDeleting && <DeleteRecord handleDeletionState={handleDeletionState} />}
-
       <div className="p-10 space-y-8 min-h-screen bg-cover bg-[url('../../assets/bg2.jpg')]">
         <div className="flex justify-between">
           <BackButton />
           <div className="space-x-4">
             <button
-              className="py-2 px-4 rounded-lg bg-red-500 font-bold text-white shadow-lg"
+              className="py-2 px-4 rounded-lg bg-red-500 font-bold text-white shadow-lg transition-all duration-500 ease-out"
               onClick={handleDeletionState}
             >
               Delete
@@ -36,7 +36,7 @@ const ShowPatientInfo = () => {
               onClick={() => {
                 navigate(`/${currClinic}/detection/${idParam}`);
               }}
-              className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg"
+              className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg transition-all duration-500 ease-out "
             >
               New Detection
             </button>
@@ -60,11 +60,11 @@ const ShowPatientInfo = () => {
                 <div className="space-y-4">
                   <PatientInfoField
                     field={'Date of Birth'}
-                    data={currPatient?.dateOfBirth}
+                    data={formatDate(new Date(currPatient?.dateOfBirth))}
                   />
                   <PatientInfoField
                     field={'Contact Number'}
-                    data={currPatient?.contact}
+                    data={currPatient?.contactNumber}
                   />
                   <PatientInfoField
                     field={'Address'}

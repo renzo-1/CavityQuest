@@ -6,15 +6,15 @@ function getMonthName(monthNumber: number) {
   return date.toLocaleString('en-US', { month: 'long' });
 }
 
-const formatDate = (date: string | Date) => {
-  const dateObj = new Date(date);
-  const formatedDate =
-    getMonthName(dateObj.getMonth()) +
+const formatDate = (date: Date) => {
+  const formattedDate =
+    getMonthName(date.getMonth()) +
     ' ' +
-    dateObj.getDate().toString() +
+    date.getDate().toString() +
     ', ' +
-    dateObj.getFullYear().toString();
-  return formatedDate;
+    date.getFullYear().toString();
+
+  return formattedDate;
 };
 
 export default formatDate;

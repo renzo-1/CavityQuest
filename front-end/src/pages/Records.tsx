@@ -1,23 +1,74 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 // import patientData from '../../seeds';
-import { searchBtn, filterBtn, cloudBtn } from '../../assets';
+import { cloudBtn } from '../assets';
 import { useNavigate } from 'react-router-dom';
-import { BackButton, PatientSearch } from 'components';
+import { BackButton } from 'components';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType } from 'utils/Interfaces';
-import { PatientRowInfo } from 'components';
+import formatDate from 'utils/formatDate';
+import { GridColDef } from '@mui/x-data-grid';
+import { StripedDataGrid } from 'utils/StripedDataGrid';
+import { PatientDataContextType, tableData } from 'utils/Interfaces';
 
 const Records = () => {
   const [searchedName, setSearchedName] = useState<string>('');
   const navigate = useNavigate();
-  const { patientData, currClinic, setCurrPatient } =
+  const { patientData, currClinic, setCurrPatient, clinics } =
     useAppContext() as PatientDataContextType;
-  const [localData, setLocalData] = useState<any>();
+  const [rows, setRows] = useState<tableData[] | undefined>();
 
-  if (patientData)
+  useEffect(() => {
+    const rowsArr: tableData[] = [];
+    if (
+      patientData &&
+      patientData.length > 0 &&
+      !patientData.includes(undefined!)
+    ) {
+      patientData.map(({ id, fullName, createdOn, treatments }, index) => {
+        const formattedDate = formatDate(new Date(createdOn.seconds * 1000));
+        rowsArr.push({
+          number: index + 1,
+          id,
+          fullName,
+          createdOn: formattedDate,
+          treatments: treatments || [],
+        });
+      });
+      setRows(rowsArr);
+    }
+  }, [patientData, currClinic, clinics]);
+
+  console.log(patientData);
+
+  const columns: GridColDef[] = [
+    { field: 'number', headerName: 'Number', width: 200 },
+    { field: 'id', headerName: 'id', width: 0 },
+    { field: 'fullName', headerName: 'Name', width: 550 },
+    {
+      field: 'createdOn',
+      headerName: 'Created on',
+      type: 'string',
+      width: 500,
+    },
+    {
+      field: 'treatments',
+      headerName: 'Treatments',
+      width: 500,
+    },
+  ];
+
+  const handleRowClick = (rowId: number) => {
+    patientData.map((patient) => {
+      if (rowId.toString() === patient.id) {
+        setCurrPatient(patient);
+        navigate(`/${currClinic}/records/${patient.id}`);
+      }
+    });
+  };
+
+  if (patientData) {
     return (
-      <div className="p-10 w-full space-y-8">
-        <div className="grid grid-cols-2">
+      <>
+        <div className="p-10 w-full space-y-8">
           <div className="flex items-center space-x-10 font-bold">
             <BackButton />
             <div className="space-x-4 flex items-center">
@@ -27,61 +78,46 @@ const Records = () => {
               <p>Sync Records on Cloud</p>
             </div>
           </div>
-          <div className="flex justify-end space-x-6">
-            <PatientSearch
-              searchedName={searchedName}
-              setSearchedName={setSearchedName}
+          <div className="text-3xl">
+            <StripedDataGrid
+              sx={{
+                '.MuiDataGrid-cellContent': {
+                  fontSize: '1.1rem',
+                  cursor: 'default',
+                },
+                '.MuiDataGrid-columnHeaderTitleContainer': {
+                  fontSize: '1.4rem',
+                  fontStyle: 'bold',
+                },
+                '.MuiDataGrid-root, .MuiDataGrid-root--densityStandard': {
+                  maxWidth: 'fit-content',
+                  minWidth: 'fit-content',
+                },
+              }}
+              getRowClassName={(params) =>
+                params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+              }
+              rows={rows || []}
+              columns={columns}
+              hideFooterPagination={true}
+              hideFooter
+              onRowClick={(rowDetails) => {
+                handleRowClick(rowDetails.row.id);
+              }}
+              initialState={{
+                columns: {
+                  columnVisibilityModel: {
+                    id: false,
+                  },
+                },
+              }}
             />
-            <button>
-              <img className="w-8 h-6" src={filterBtn} alt="search button" />
-            </button>
           </div>
         </div>
-        <div>
-          <div className="grid grid-cols-3 border-b-4 border-black">
-            <div className="flex">
-              <h3 className="font-bold w-[50px]">ID</h3>
-              <h3 className="font-bold">Name</h3>
-            </div>
-            <h3 className="font-bold">Date Added</h3>
-            <h3 className="font-bold">Treatment</h3>
-          </div>
-          {patientData &&
-            patientData.length > 0 &&
-            patientData.map((patient) => (
-              <div
-                key={patient.id}
-                className="grid grid-cols-3 border-b mt-8 cursor-pointer"
-                onClick={() => {
-                  setCurrPatient(patient);
-                  navigate(`/${currClinic}/records/${patient.id}`);
-                }}
-              >
-                {searchedName.length > 1 ? (
-                  patient.fullName?.match(new RegExp(searchedName, 'gi')) && (
-                    <PatientRowInfo
-                      id={Number(patient.id)}
-                      fullName={patient.fullName}
-                      dateAdded={patient.dateAdded}
-                      treatments={patient.treatments}
-                    />
-                  )
-                ) : (
-                  <PatientRowInfo
-                    id={Number(patient.id)}
-                    fullName={patient.fullName}
-                    dateAdded={patient.dateAdded}
-                    treatments={patient.treatments}
-                  />
-                )}
-              </div>
-            ))}
-        </div>
-      </div>
+      </>
     );
-  else {
-    return <></>;
+  } else {
+    return <p>No patient data!</p>;
   }
 };
-
 export default Records;

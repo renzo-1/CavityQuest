@@ -1,25 +1,27 @@
-import axios from 'axios';
-import Spinner from 'components/Spinner';
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useReducer,
-} from 'react';
-import { useParams } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+
 import {
-  PatientData,
-  PatientResponseData,
   DentistProps,
   ClinicProps,
   PatientDataContextType,
-  PatientDataKind,
-  PatientDataAction,
+  FormattedPatientData,
 } from 'utils/Interfaces';
-
+import { db } from 'utils/firebase-config';
+import {
+  collection,
+  getDocs,
+  getDoc,
+  query,
+  doc,
+  onSnapshot,
+  updateDoc,
+  arrayRemove,
+  DocumentReference,
+  arrayUnion,
+} from '@firebase/firestore';
 const AppContext = createContext<PatientDataContextType | null>(null);
-
+import { formatPatientData } from 'utils/formatPatientData';
 export const useAppContext = () => {
   return useContext(AppContext);
 };
@@ -28,98 +30,162 @@ interface AppProps {
   children?: React.ReactNode;
 }
 
-function reducer(state: PatientData[], action: PatientDataAction) {
-  const { type, payload } = action;
-  const { patientData, currPatient } = payload;
-
-  switch (type) {
-    case PatientDataKind.READ:
-      return patientData.map((patient) => formatPatientData(patient))!;
-
-    case PatientDataKind.CREATE:
-      return [...state, formatPatientData(patientData[0])];
-
-    case PatientDataKind.UPDATE:
-      const newArr = state.filter((patient) => patient.id !== currPatient);
-      console.log('haha',[...newArr, formatPatientData(patientData[0])]);
-      return [...newArr, formatPatientData(patientData[0])];
-
-    case PatientDataKind.DELETE:
-      const newState = state.filter((patient) => patient.id !== currPatient);
-      return [...newState];
-
-    default:
-      throw Error('Unknown action.');
-  }
-}
-
-const formatPatientData = (data: PatientResponseData) => {
-  const fullName =
-    data.last_name +
-    ', ' +
-    data.first_name +
-    ' ' +
-    data.middle_name.charAt(0) +
-    '.';
-
-  const formattedData = {
-    id: data.id,
-    fullName,
-    firstName: data.first_name,
-    lastName: data.last_name,
-    middleName: data.middle_name,
-    gender: data.gender,
-    clinic: data.clinic,
-    dentist: data.dentist,
-    address: data.address,
-    dateOfBirth: data.date_of_birth,
-    contact: data.contact_number,
-    imageUploads: data.image_uploads,
-    doctorsNote: data.doctors_note,
-    dateAdded: data.date_added,
-    dateModified: data.date_modified,
-    treatments:
-      typeof data.treatments == 'string' ? JSON.parse(data.treatments) : [],
-  };
-  return formattedData;
-};
 const AppProvider: React.FC<AppProps> = ({ children }) => {
-  const [patientData, dispatchPatientData] = useReducer(reducer, []);
-  const [d, setPatientData] = useState<PatientData[]>([]);
-  const [isNewData, setIsNewData] = useState<Boolean>(false);
-  const [currPatient, setCurrPatient] = useState<PatientData | undefined>();
-  const [isLoading, setIsLoading] = useState<Boolean>(false);
-  const [currClinic, setCurrClinic] = useState<number | undefined>();
-  const [dentists, setDentists] = useState<DentistProps[]>([]);
+  const [patientData, setPatientData] = useState<FormattedPatientData[]>([]);
+  const [showClinics, setShowClinics] = useState<boolean>(true);
+  const [currPatient, setCurrPatient] = useState<
+    FormattedPatientData | undefined
+  >();
+  const [currClinic, setCurrClinic] = useState<string>('');
+  const [dentists, setDentists] = useState<DentistProps[] | undefined>();
   const [clinics, setClinics] = useState<ClinicProps[]>([]);
 
-  useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/clinics/')
-      .then((res) => {
-        setClinics([]);
-        res.data.map((clinic: any) =>
-          setClinics((prev) => [...prev, { id: clinic.id, name: clinic.name }])
-        );
-        res.data.map((clinic: any) => {
-          // render the data from current clinic
-          if (currClinic && clinic.id === currClinic) {
-            setDentists(clinic.dentist_clinic);
-            console.log('dentist', clinic.dentist_clinic);
-            // setPatientData(formatPatientData(clinic.patient_clinic));
-            dispatchPatientData({
-              type: PatientDataKind.READ,
-              payload: { patientData: clinic.patient_clinic },
-            });
-            setIsLoading(false);
-          } else {
-            setCurrClinic(res.data[0].id);
-          }
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+  const clinicsCollection = collection(db, 'clinics');
+  const patientCollection = collection(db, 'patients');
+  const dentistCollection = collection(db, 'dentists');
+
+  const getPatients = async () => {
+    try {
+      let patientsArr: any = [];
+
+      for (let clinic of clinics) {
+        if (
+          clinic.id === currClinic &&
+          clinic.patients &&
+          clinic.patients.length > 0
+        ) {
+          patientsArr = await Promise.all(
+            clinic.patients.map(async (patient: any) => {
+              const docSnap = await getDoc(patient);
+              if (docSnap.exists()) {
+                const data: any = docSnap.data();
+                return formatPatientData(data, docSnap.id, currClinic);
+              } else {
+                console.log('patient not exists');
+              }
+            })
+          );
+        }
+      }
+      setPatientData(patientsArr);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getDentists = async () => {
+    try {
+      let dentistsArr: any = [];
+      for (let clinic of clinics) {
+        if (
+          clinic.id === currClinic &&
+          clinic.dentists &&
+          clinic.dentists.length > 0
+        ) {
+          dentistsArr = await Promise.all(
+            clinic.dentists.map(async (dentist: any) => {
+              const docSnap = await getDoc(dentist);
+              if (docSnap.exists()) {
+                const data: any = docSnap.data();
+                return {
+                  id: docSnap.id,
+                  name: data.name,
+                };
+              }
+              return undefined;
+            })
+          );
+        }
+      }
+      setDentists(dentistsArr);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getClinics = async () => {
+    // const data = await getDocs(clinicsCollectionRef);
+
+    // const res = data.docs.map((doc) => ({
+    //   patients: doc.data().patients,
+    //   dentists: doc.data().dentists,
+    //   name: doc.data().name,
+    //   id: doc.id,
+    // }));
+
+    const q = query(clinicsCollection);
+
+    onSnapshot(q, { includeMetadataChanges: true }, (querySnapshot) => {
+      const clinicSnap = querySnapshot.docs.map((doc) => ({
+        patients: doc.data().patients,
+        dentists: doc.data().dentists,
+        name: doc.data().name,
+        id: doc.id,
+      }));
+      const source = querySnapshot.metadata.fromCache
+        ? 'local cache'
+        : 'server';
+      console.log('Data came from ' + source);
+      setClinics(clinicSnap);
+      // if (clinicSnap && clinicSnap.length > 0 && currClinic == '') {
+      //   setCurrClinic(clinicSnap[0].id);
+      // }
+    });
+
+    //   // Document was found in the cache. If no cached document exists,
+    //   // an error will be returned to the 'catch' block below.
+    //   console.log("Cached document data:", doc.data());
+    // } catch (e) {
+    //   console.log("Error getting cached document:", e);
+    // }
+  };
+
+  const updateClinic = async (newDataRef: any, field: string) => {
+    if (currClinic) {
+      const clinicRef = doc(clinicsCollection, currClinic);
+      const clinicSnap = await getDoc(clinicRef);
+
+      if (clinicSnap.exists()) {
+        let newArr;
+        // if patient or dentist records already exists in the current clinic
+        if (clinicSnap.data()[field] && clinicSnap.data()[field].length > 0) {
+          await updateDoc(clinicRef, { [field]: arrayUnion(newDataRef) });
+        }
+        // if no records for patient and dentist for the current clinic
+        else {
+          newArr = [newDataRef];
+          await updateDoc(clinicRef, { [field]: newArr });
+        }
+      }
+    }
+  };
+  const deletePatientOnClinic = async (
+    deletedPatientRef: DocumentReference
+  ) => {
+    if (currClinic) {
+      const clinicRef = doc(clinicsCollection, currClinic);
+
+      await updateDoc(clinicRef, {
+        patients: arrayRemove(deletedPatientRef),
       });
+    }
+  };
+
+  useEffect(() => {
+    if (clinics.length > 0) {
+      getPatients();
+      getDentists();
+    }
+  }, [clinics, currClinic]);
+
+  useEffect(() => {
+    if (clinics.length > 0) {
+      setCurrClinic(currClinic || clinics[0].id);
+    }
+  }, [clinics]);
+
+  useEffect(() => {
+    getClinics();
   }, [currClinic]);
 
   return (
@@ -129,8 +195,10 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
           value={{
             patientData,
             setPatientData,
-            dispatchPatientData,
-            setIsNewData,
+            getDentists,
+            getPatients,
+            setShowClinics,
+            showClinics,
             currPatient,
             setCurrPatient,
             clinics,
@@ -138,14 +206,11 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             setCurrClinic,
             dentists,
             setDentists,
+            getClinics,
+            updateClinic,
+            deletePatientOnClinic,
           }}
         >
-          {isLoading && (
-            <div className="absolute top-0 left-0 h-screen w-full bg-black bg-opacity-50 flex items-center justify-center">
-              <Spinner />
-            </div>
-          )}
-
           {children}
         </AppContext.Provider>
       )}

@@ -15,23 +15,33 @@ import {
 } from 'utils/Interfaces';
 import { useAppContext } from 'features/AppContext';
 import { treatments } from 'data/treatments';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { doc, collection, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from 'utils/firebase-config';
+import { formatPatientData } from 'utils/formatPatientData';
 interface EditProps {
-  dentist: number;
-  doctorsNote?: string;
-  treatments?: string[] | null;
+  note: string;
+  treatments: string[] | null;
 }
 const EditRecord = () => {
   const { id: idParam } = useParams();
-  const { currPatient, dispatchPatientData, currClinic, dentists, clinics } =
-    useAppContext() as PatientDataContextType;
+
+  const {
+    currPatient,
+    currClinic,
+    dentists,
+    setCurrPatient,
+    setPatientData,
+    clinics,
+    patientData,
+  } = useAppContext() as PatientDataContextType;
+
   const [checkboxValues, setCheckboxValues] = useState<string[]>(
     currPatient?.treatments! || []
   );
   const [isEdit, setIsEdit] = useState<Boolean>();
-
+  const [dentist, setDentist] = useState<string>();
   const {
     register,
     formState: { errors, isDirty, touchedFields },
@@ -41,82 +51,80 @@ const EditRecord = () => {
     setValue,
   } = useForm<EditProps>({
     defaultValues: {
-      dentist: currPatient?.dentist,
-      doctorsNote: currPatient?.doctorsNote,
+      note: currPatient?.note,
       treatments: currPatient?.treatments,
     },
   });
+
   useEffect(() => {
     // setCheckboxValues(currPatient?.treatments! || []);
-    setValue('doctorsNote', currPatient?.doctorsNote);
-    setValue('treatments', currPatient?.treatments);
-  }, [currPatient?.treatments, currPatient?.doctorsNote]);
+    setValue('note', currPatient?.note || '');
+    setValue('treatments', currPatient?.treatments || []);
 
-  const onSubmit = (data: EditProps) => {
-    if (isDirty) {
-      console.log('changed');
-      axios
-        .patch(`http://localhost:8000/api/patients/${idParam}/`, {
-          doctors_note: data.doctorsNote,
-          treatments: JSON.stringify(data.treatments),
-        })
-        .then((res) => {
-          // setPatientData((prevData) => {
-          //   const newArr = prevData.filter(
-          //     (patient) => patient.id !== currPatient?.id
-          //   );
+    const setDentistField = async () => {
+      if (currPatient?.dentist) {
+        const dentistSnap = await getDoc(currPatient?.dentist);
+        setDentist(dentistSnap.data()?.name || '');
+      }
+    };
 
-          //   const newData = res.data;
+    setDentistField();
+  }, [currPatient?.treatments, currPatient?.note]);
 
-          //   const fullName =
-          //     newData.last_name +
-          //     ', ' +
-          //     newData.first_name +
-          //     ' ' +
-          //     newData.middle_name.charAt(0) +
-          //     '.';
+  const { id } = useParams();
 
-          //   const formattedData = {
-          //     id: newData.id,
-          //     fullName,
-          //     firstName: newData.first_name,
-          //     lastName: newData.last_name,
-          //     middleName: newData.middle_name,
-          //     gender: newData.gender,
-          //     clinic: newData.clinic,
-          //     dentist: newData.dentist,
-          //     address: newData.address,
-          //     dateOfBirth: newData.date_of_birth,
-          //     contact: newData.contact_number,
-          //     imageUploads: newData.image_uploads,
-          //     doctorsNote: newData.doctors_note,
-          //     dateAdded: newData.date_added,
-          //     dateModified: newData.date_modified,
-          //     treatments: JSON.parse(newData.treatments),
-          //   };
+  const onSubmit = async (data: EditProps) => {
+    const toastId = toast.loading('Saving changes...');
 
-          //   return [...newArr, formattedData];
-          // });
-          dispatchPatientData({
-            type: PatientDataKind.UPDATE,
-            payload: { patientData: [res.data], currPatient: currPatient?.id },
-          });
-          setIsEdit(false);
-          toast.success('Record successfully updated', {
-            autoClose: 5000,
-          });
-        })
-        .catch((err) =>
-          toast.error(
-            'There was an error editing the record. Please try again',
+    try {
+      if (isDirty && id) {
+        const patientRef = doc(db, 'patients', id);
+        const patientSnap = await getDoc(patientRef);
+
+        await updateDoc(patientRef, {
+          note: data.note,
+          treatments: data.treatments,
+        });
+
+        setPatientData((prevData) => {
+          const newArr = prevData.filter(
+            (patient) => patient?.id !== currPatient?.id
+          );
+          return [
+            ...newArr,
             {
-              autoClose: 5000,
-            }
-          )
-        );
-    } else {
-      setIsEdit(false);
-      console.log('no change');
+              ...currPatient!,
+              note: data.note,
+              treatments: data.treatments || [],
+            },
+          ];
+        });
+
+        setCurrPatient((patient) => {
+          return {
+            ...patient!,
+            note: data.note,
+            treatments: data.treatments || [],
+          };
+        });
+
+        toast.update(toastId, {
+          render: 'Update successfully',
+          type: 'success',
+          autoClose: 1000,
+          isLoading: false,
+        });
+        setIsEdit(false);
+      } else {
+        setIsEdit(false);
+      }
+    } catch (e) {
+      toast.update(toastId, {
+        render: 'An error occured saving your changes. Try reloading.',
+        type: 'error',
+        autoClose: 2000,
+        isLoading: false,
+      });
     }
   };
 
@@ -151,19 +159,16 @@ const EditRecord = () => {
         <div className="mb-2 justify-between flex">
           <div>
             <h3 className="text-sm">Dentist</h3>
-            {dentists.map(
-              (dentist) =>
-                dentist.id == currPatient?.dentist && (
-                  <p className="font-bold text-xl rounded-lg">{dentist.name}</p>
-                )
-            )}
+            <p className="font-bold text-xl rounded-lg">{dentist}</p>
           </div>
           <div>
             <h3 className="text-sm">Clinic</h3>
             {clinics.map(
               (clinic) =>
                 clinic.id == currPatient?.clinic && (
-                  <p className="font-bold text-xl rounded-lg">{clinic.name}</p>
+                  <p key={clinic.id} className="font-bold text-xl rounded-lg">
+                    {clinic.name}
+                  </p>
                 )
             )}
           </div>
@@ -172,7 +177,10 @@ const EditRecord = () => {
         <div className="flex justify-between mb-2">
           <h1 className="text-sm">Treatment</h1>
           {isEdit ? (
-            <button type="submit" className="font-bold">
+            <button
+              type="submit"
+              className="font-bold transition-all duration-500 ease-out"
+            >
               Save
             </button>
           ) : (
@@ -218,7 +226,7 @@ const EditRecord = () => {
         <div className="space-y-2">
           <h1 className="text-sm">Note</h1>
           <textarea
-            {...register('doctorsNote')}
+            {...register('note')}
             disabled={!isEdit}
             className="w-full bg-myGray rounded-lg h-14 border p-2"
             placeholder="Write notes here"

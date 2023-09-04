@@ -7,35 +7,35 @@ import {
 } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { closeBtn, check, plus } from '../../../assets';
+import { closeBtn, check, plus } from '../../assets';
 import FormFieldError from './FormFieldError';
-import axios from 'axios';
+import DentistForm from './DentistForm';
 import {
   PatientDataContextType,
   PatientData,
+  CreatePatientData,
   ImageUpload,
-  PatientDataKind,
 } from 'utils/Interfaces';
 import { useAppContext } from 'features/AppContext';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import { capitalize } from 'utils/capitilize';
+import { collection, addDoc, Timestamp, doc } from '@firebase/firestore';
+import { db } from 'utils/firebase-config';
+import { uploadFile } from 'utils/uploadFiles';
+
 const PatientForm = ({
   setShow,
 }: {
   setShow: Dispatch<SetStateAction<boolean>>;
 }) => {
   const {
-    setIsNewData,
-    setPatientData,
     dentists: availableDentists,
+    clinics,
     currClinic,
-    setDentists,
-    dispatchPatientData,
+    updateClinic,
+    getPatients,
   } = useAppContext() as PatientDataContextType;
   const [isAddingDentist, setIsAddingDentist] = useState<boolean>(false);
-  const [newDentist, setNewDentist] = useState<string>('');
-  const { id } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const {
     register,
@@ -44,55 +44,62 @@ const PatientForm = ({
     reset,
     watch,
     setValue,
-  } = useForm<PatientData>();
+  } = useForm<CreatePatientData>();
 
   const uploadedFiles: FileList | ImageUpload[] = watch('imageUploads'); // Access the uploaded files using the watch function
 
-  const onSubmit = (data: PatientData) => {
-    // Date format (YYYY-MM-DD)
-    const birthDate = new Date(data.dateOfBirth).toISOString().slice(0, 10);
-    const formData = {
-      clinic: currClinic,
-      first_name: data.firstName,
-      middle_name: data.middleName,
-      last_name: data.lastName,
-      date_of_birth: birthDate,
-      gender: data.gender,
-      address: data.address,
-      dentist: data.dentist,
-      contact_number: data.contact,
-      image_uploads: data.imageUploads,
-    };
+  const patientCollection = collection(db, 'patients');
 
-    console.log(formData);
+  const onSubmit = async (data: CreatePatientData) => {
+    const toastId = toast.loading('Saving record...');
 
-    axios
-      .post('http://127.0.0.1:8000/api/patients/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then((res: any) => {
-        // setIsNewData((prev) => !prev);
-        // setPatientData((prev) => [...prev, res.data]);
-        dispatchPatientData({
-          type: PatientDataKind.CREATE,
-          payload: { patientData: [res.data] },
-        });
-        navigate(`/${currClinic}/detection/${res.data.id}`);
-        toast.success('Record successfully saved', {
-          autoClose: 5000,
-        });
-        reset();
-      })
-      .catch((err) => {
-        toast.error('There was an error saving the record. Please try again', {
-          autoClose: 5000,
-        });
+    try {
+      const imgs = await Promise.all(
+        await Array.from(data.imageUploads).map((file) => uploadFile(file))
+      );
+      const birthDate = new Date(data.dateOfBirth).toISOString().slice(0, 10);
+
+      const formData = {
+        // clinic: `/clinics/${currClinic}`,
+        firstName: capitalize(data.firstName),
+        middleName: capitalize(data.middleName),
+        lastName: capitalize(data.lastName),
+        dateOfBirth: birthDate,
+        gender: data.gender,
+        address: data.address,
+        dentist: doc(collection(db, 'dentists'), data.dentist),
+        contactNumber: data.contactNumber,
+        imageUploads: imgs || [],
+        createdOn: Timestamp.now(),
+      };
+
+      const newPatientRef = await addDoc(patientCollection, formData);
+
+      updateClinic(newPatientRef, 'patients');
+      getPatients();
+      navigate(`/${currClinic}/detection/${newPatientRef.id}`);
+
+      toast.update(toastId, {
+        render: 'Record saved',
+        type: 'success',
+        autoClose: 2000,
+        isLoading: false,
       });
+
+      reset();
+    } catch (e) {
+      toast.update(toastId, {
+        render: 'An error occured saving your record. Try reloading.',
+        type: 'error',
+        autoClose: 2000,
+        isLoading: false,
+      });
+    }
   };
 
   const handleInputChanges = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    setValue('dentist', parseInt(value));
+    setValue('dentist', value);
   };
 
   const handleRemoveFile = (index: number) => {
@@ -100,47 +107,18 @@ const PatientForm = ({
     setValue('imageUploads', newFilesList);
   };
 
-  const handleDentistSubmit = () => {
-    axios
-      .post('http://127.0.0.1:8000/api/dentists/', {
-        clinic: currClinic,
-        name: newDentist,
-      })
-      .then((res) => {
-        setDentists((prev) => [...prev, res.data]);
-        setIsAddingDentist(false);
-        toast.success('New dentist has been saved', {
-          autoClose: 5000,
-        });
-      })
-      .catch((e) =>
-        toast.error('There was an error saving the record. Please try again', {
-          autoClose: 5000,
-        })
-      );
-  };
-
   useEffect(() => {
-    console.log(availableDentists);
-    setValue('dentist', availableDentists[0].id!);
-  }, []);
+    if (
+      availableDentists &&
+      availableDentists[0] &&
+      availableDentists.length > 0
+    ) {
+      setValue('dentist', availableDentists[0].id!);
+    }
+  }, [availableDentists, clinics]);
 
   return (
     <>
-      <div className="w-full h-screen absolute top-0 left-0 border border-red-500">
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </div>
       <div className="py-8 px-10 absolute w-[50rem] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-myGray rounded-lg z-30">
         <div className="flex justify-between">
           <h1 className='font-bold before:content[""] before:absolute before:w-8 before:border-b-4 before:border-black before:h-7'>
@@ -149,7 +127,7 @@ const PatientForm = ({
           <button>
             <img
               src={closeBtn}
-              alt="close button"
+              alt="close button transition-all duration-500 ease-out"
               onClick={() => setShow((prev) => !prev)}
             />
           </button>
@@ -164,6 +142,7 @@ const PatientForm = ({
             <label>
               <p className="font-medium">First Name</p>
               <input
+                className="capitalize"
                 placeholder="Your first name"
                 {...register('firstName', { required: true })}
                 aria-invalid={errors.firstName ? 'true' : 'false'}
@@ -176,6 +155,7 @@ const PatientForm = ({
             <label>
               <p className="font-medium">Middle Name (Optional)</p>
               <input
+                className="capitalize"
                 placeholder="Your middle name"
                 {...register('middleName')}
               />
@@ -184,6 +164,7 @@ const PatientForm = ({
             <label>
               <p className="font-medium">Last Name</p>
               <input
+                className="capitalize"
                 placeholder="Your last name"
                 {...register('lastName', { required: true })}
                 aria-invalid={errors.lastName ? 'true' : 'false'}
@@ -225,6 +206,7 @@ const PatientForm = ({
             <label>
               <p className="font-medium">Address</p>
               <input
+                className="capitalize"
                 placeholder="House no., baranggay, city, province"
                 {...register('address', { required: true })}
                 aria-invalid={errors.address ? 'true' : 'false'}
@@ -238,17 +220,16 @@ const PatientForm = ({
               <p className="font-medium">Contact Number</p>
               <input
                 placeholder="Your contact number"
-                {...register('contact', {
+                {...register('contactNumber', {
                   required: true,
                   pattern: /^09\d{9}$/,
                   minLength: 11,
                   maxLength: 11,
                 })}
-                onChange={(e) => console.log(e.target.value)}
-                aria-invalid={errors.contact ? 'true' : 'false'}
+                aria-invalid={errors.contactNumber ? 'true' : 'false'}
               />
               <FormFieldError
-                errField={errors.contact?.type}
+                errField={errors.contactNumber?.type}
                 descs={{
                   maxLength: 'Contact number can be up to 11 digits',
                   minLength: 'Contact number must be at least 11 digits',
@@ -269,46 +250,36 @@ const PatientForm = ({
                   { required: true, onChange: handleInputChanges })}
                   aria-invalid={errors.dentist ? 'true' : 'false'}
                 >
-                  {availableDentists.map((dentist) => (
-                    <option key={dentist.id} value={dentist.id}>
-                      {dentist.name}
-                    </option>
-                  ))}
+                  {availableDentists &&
+                    availableDentists.length > 0 &&
+                    availableDentists.map(
+                      (dentist) =>
+                        dentist && (
+                          <option key={dentist.id} value={dentist.id}>
+                            {dentist.name}
+                          </option>
+                        )
+                    )}
                 </select>
                 <span
                   role="button"
                   onClick={() => setIsAddingDentist(true)}
-                  className="rounded-lg px-4 py-2 shadow-md text-black "
+                  className="rounded-lg px-4 py-2 shadow-md text-black flex justify-center items-center buttonSpan"
                 >
-                  <img src={plus} alt="add clinic" className="h-6 w-6 "></img>
+                  <img
+                    src={plus}
+                    alt="add clinic"
+                    className="h-6 w-6 buttonSpan"
+                  ></img>
                 </span>
               </div>
-
               <FormFieldError
                 errField={errors.dentist?.type}
                 descs={{ required: 'Dentist is required' }}
               />
+
               {isAddingDentist && (
-                <div className="mt-4 flex justify-center items-center space-x-4">
-                  <input
-                    placeholder="Name of dentist"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      console.log(e.target.value);
-                      setNewDentist(e.target.value);
-                    }}
-                  ></input>
-                  <span
-                    role="submit"
-                    onClick={handleDentistSubmit}
-                    className="rounded-lg px-4 py-2 shadow-md bg-primary cursor-pointer"
-                  >
-                    <img
-                      src={check}
-                      alt="add dentist"
-                      className="h-6 w-6 "
-                    ></img>
-                  </span>
-                </div>
+                <DentistForm setIsAddingDentist={setIsAddingDentist} />
               )}
             </label>
 
@@ -338,7 +309,7 @@ const PatientForm = ({
                       {file.name}
                     </p>
                     <button
-                      className="inline-block font-bold"
+                      className="inline-block font-bold transition-all duration-500 ease-out"
                       onClick={(e) => handleRemoveFile(index)}
                     >
                       x
@@ -354,7 +325,7 @@ const PatientForm = ({
                 <a className="font-bold"> Privacy Policy</a>
               </p>
               <button
-                className="text-xl bg-primary py-3 px-6 w-fit font-bold block text-white rounded-lg"
+                className="text-xl bg-primary py-3 px-6 w-fit font-bold block text-white rounded-lg transition-all duration-500 ease-out"
                 type="submit"
               >
                 Done

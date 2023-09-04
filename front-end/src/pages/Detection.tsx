@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { WebcamOps } from '../utils/webcam';
-import '../styles/App.css';
-import { BackButton, Carousel, Detection as Detect } from 'components';
+import { Carousel, Detection as Detect } from 'components';
 import { useAppContext } from 'features/AppContext';
 import {
   PatientDataContextType,
@@ -9,98 +8,70 @@ import {
   PatientDataKind,
 } from 'utils/Interfaces';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+
+import { getDoc, updateDoc, doc } from '@firebase/firestore';
+import { db } from 'utils/firebase-config';
+import { uploadFile } from 'utils/uploadFiles';
 
 const Detection = () => {
   const { id } = useParams();
-  const { currPatient, setIsNewData, currClinic, dispatchPatientData } =
-    useAppContext() as PatientDataContextType;
+  const { currClinic, getPatients } = useAppContext() as PatientDataContextType;
   const videoRef = useRef<HTMLVideoElement>(null);
   const webcamOps = new WebcamOps();
   const [captures, setCaptures] = useState<string[]>([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    // const dateNow = Date.now();
+  const handleSubmit = async () => {
+    const toastId = toast.loading('Saving detection...');
 
-    // let newFiles: File[] = [];
+    try {
+      const imgs = await Promise.all(
+        captures.map(async (file, index) => {
+          const result = await uploadFile(file, `detection${index}`);
+          return result;
+        })
+      );
 
-    // captures.map((image, index) => {
-    //   fetch(image)
-    //     .then((res) => res.blob())
-    //     .then((blob) => {
-    //       const newFile = new File([blob], `detection${index}`, {
-    //         type: 'image/jpeg',
-    //       });
-    //       newFiles.push(newFile);
-    //     });
-    // });
-    const formData = { new_image_uploads: captures };
+      if (id) {
+        const patientRef = doc(db, 'patients', id);
+        const patientSnap = await getDoc(patientRef);
 
-    console.log(formData);
+        let newImageUploadsArr;
+        if (patientSnap.exists()) {
+          newImageUploadsArr = [...patientSnap.data().imageUploads];
+          imgs.map((img) => newImageUploadsArr.push(img));
+        }
 
-    axios
-      .patch(`http://localhost:8000/api/patients/${id}/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then((res) => {
-        const imageUploads: ImageUpload[] = [];
-        const newData = JSON.parse(res.data);
+        await updateDoc(patientRef, { imageUploads: newImageUploadsArr });
 
-        axios
-          .get(`http://localhost:8000/api/image_uploads/`)
-          .then((res) => {
-            const { data } = res;
+        webcamOps.close(videoRef);
 
-            data.map(
-              (img: any) =>
-                img?.patient == currPatient?.id && imageUploads.push(img)
-            );
+        getPatients();
 
-            dispatchPatientData({
-              type: PatientDataKind.UPDATE,
-              payload: {
-                patientData: [
-                  {
-                    ...newData[0].fields,
-                    id: currPatient?.id,
-                    image_uploads: imageUploads,
-                  },
-                ],
-                currPatient: currPatient?.id,
-              },
-            });
+        navigate(`/${currClinic}/records/${id}`);
 
-            toast.success('Successfully saved', {
-              autoClose: 5000,
-            });
-            webcamOps.close(videoRef);
-            navigate(`/${currClinic}/records/${id}`);
-          })
-          .then((err) =>
-            toast.error(
-              'There was an error retreiving the record. Please try again',
-              {
-                autoClose: 5000,
-              }
-            )
-          );
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.error('There was an error saving the record. Please try again', {
-          autoClose: 5000,
+        toast.update(toastId, {
+          render: 'Detection saved',
+          type: 'success',
+          autoClose: 1000,
+          isLoading: false,
         });
+      }
+    } catch (e) {
+      console.log(e);
+      toast.update(toastId, {
+        render: 'An error occured saving your detection. Try reloading.',
+        type: 'error',
+        autoClose: 2000,
+        isLoading: false,
       });
+    }
   };
 
   return (
     <>
-      <ToastContainer />
-
       <div className="p-10 h-screen relative w-full">
         <Detect
           videoRef={videoRef}

@@ -9,22 +9,23 @@ import {
   PatientDataContextType,
   PatientData,
   ImageUpload,
+  FormattedPatientData,
 } from 'utils/Interfaces';
 import formatDate from 'utils/formatDate';
 import { useAppContext } from 'features/AppContext';
+import { Timestamp } from 'firebase/firestore';
 // array to set to array (function: get unique dates)
-const getUniqueDateRecords = (arr: PatientData | undefined) => {
+const getUniqueDateRecords = (arr: FormattedPatientData | undefined) => {
   try {
-    if (arr) {
-      return Array.from(
-        new Set(
-          Array.from(arr.imageUploads).map((file) => {
-            return file.date_created.toString();
-          })
-        )
-      );
-    }
-  } catch {
+    const convertTimestampToDate = Array.from(arr?.imageUploads!).map(
+      (file) => {
+        return formatDate(new Date(file.createdOn.seconds * 1000));
+      }
+    );
+
+    return Array.from(new Set(convertTimestampToDate));
+  } catch (e) {
+    console.log(e);
     return [];
   }
 };
@@ -32,8 +33,6 @@ const getUniqueDateRecords = (arr: PatientData | undefined) => {
 interface Props {
   id?: string;
 }
-
-
 
 const ShowImageRecords = ({ id }: Props) => {
   const { patientData, setCurrPatient, currPatient } =
@@ -63,25 +62,28 @@ const ShowImageRecords = ({ id }: Props) => {
         <div
           className={`shadow-lg rounded-lg px-14 ${
             dateStamps?.length != 0 && 'pb-10'
-          } mx-auto relative bg-white`}
+          } mx-auto relative bg-white w-full h-full`}
         >
           {dateStamps?.reverse().map((date) => {
             return (
               <div className="space-y-4 z-20 pt-10" key={date}>
                 <div className="flex items-center justify-center space-x-8">
                   <h1 className="relative text-xl font-bold inline-block w-fit whitespace-nowrap ">
-                    {formatDate(date)}
+                    {date}
                   </h1>
                   <hr className="inline-block w-full border-0 border-t border-black"></hr>
                 </div>
                 <div className="grid grid-cols-3 gap-8">
-                  {Array.from(currPatient?.imageUploads!).map((file, index) => {
-                    if (file.date_created.toString() === date)
+                  {currPatient?.imageUploads!.map((img, index) => {
+                    if (
+                      formatDate(new Date(img.createdOn.seconds * 1000)) ===
+                      date
+                    )
                       return (
                         <img
                           key={index}
                           className="rounded-lg z-20"
-                          src={file.image}
+                          src={img.url}
                           alt="detection sample"
                         ></img>
                       );

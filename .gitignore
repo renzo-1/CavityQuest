@@ -6,6 +6,7 @@ front-end/*.log
 front-end/pids
 front-end/*.pid
 front-end/*.seed
+front-end/*.env
 
 # Coverage directory used by tools like istanbul
 front-end/coverage
@@ -35,6 +36,7 @@ front-end/*.scss.d.ts
 /back-end/uploads
 /back-end/*.log
 /back-end/.venv/
-
+/back-end
 .vscode/
 
+front-end/src/utils/firebase-config.ts
