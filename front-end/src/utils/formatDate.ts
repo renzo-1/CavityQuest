@@ -8,7 +8,7 @@ function getMonthName(monthNumber: number) {
 
 const formatDate = (date: Date) => {
   const formattedDate =
-    getMonthName(date.getMonth()) +
+    getMonthName(date.getMonth() + 1) +
     ' ' +
     date.getDate().toString() +
     ', ' +

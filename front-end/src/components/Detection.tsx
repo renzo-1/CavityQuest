@@ -17,6 +17,8 @@ import { non_max_suppression } from '../utils/nonMaxSuppression';
 // import '../styles/App.css';
 import { BackButton } from 'components';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from 'features/AppContext';
+import { ContextType } from 'utils/Interfaces';
 
 function shortenedCol(arrayofarray: any, indexlist: any) {
   return arrayofarray.map(function (array: number[]) {
@@ -32,12 +34,14 @@ const Detection = ({
   captures,
   setCaptures,
   setIsGalleryOpen,
+  webcamOps,
 }: {
   handleSubmit: () => void;
   videoRef: RefObject<HTMLVideoElement>;
   captures: string[];
   setCaptures: Dispatch<SetStateAction<string[]>>;
   setIsGalleryOpen: Dispatch<SetStateAction<boolean>>;
+  webcamOps: WebcamOps;
 }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState({ loading: true, progress: 0 });
@@ -46,10 +50,10 @@ const Detection = ({
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>();
   const model_dim: [number, number] = [640, 640];
+  const { currPatient, currClinic } = useAppContext() as ContextType;
   const w = 640;
   const h = 640;
 
-  const webcamOps = new WebcamOps();
   // configs
   const modelName = 'Cavity Detection';
   const threshold = 0.3;
@@ -175,7 +179,7 @@ const Detection = ({
         </div>
         <div>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/${currClinic?.id}/records/`)}
             className="font-bold text-xl px-4 py-2 "
           >
             Skip

@@ -1,19 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 // import patientData from '../../seeds';
-import { cloudBtn } from '../assets';
+import { cloudBtn } from '../../assets';
 import { useNavigate } from 'react-router-dom';
 import { BackButton } from 'components';
 import { useAppContext } from 'features/AppContext';
 import formatDate from 'utils/formatDate';
 import { GridColDef } from '@mui/x-data-grid';
 import { StripedDataGrid } from 'utils/StripedDataGrid';
-import { PatientDataContextType, tableData } from 'utils/Interfaces';
+import { ContextType, tableData } from 'utils/Interfaces';
 
 const Records = () => {
   const [searchedName, setSearchedName] = useState<string>('');
   const navigate = useNavigate();
-  const { patientData, currClinic, setCurrPatient, clinics } =
-    useAppContext() as PatientDataContextType;
+  const { patientData, setPatientData, currClinic, setCurrPatient, clinics } =
+    useAppContext() as ContextType;
+
   const [rows, setRows] = useState<tableData[] | undefined>();
 
   useEffect(() => {
@@ -23,21 +24,22 @@ const Records = () => {
       patientData.length > 0 &&
       !patientData.includes(undefined!)
     ) {
-      patientData.map(({ id, fullName, createdOn, treatments }, index) => {
-        const formattedDate = formatDate(new Date(createdOn.seconds * 1000));
-        rowsArr.push({
-          number: index + 1,
-          id,
-          fullName,
-          createdOn: formattedDate,
-          treatments: treatments || [],
-        });
-      });
+      patientData.map(
+        ({ id, patientNumber, fullName, createdOn, treatments }) => {
+          const formattedDate = formatDate(new Date(createdOn.seconds * 1000));
+
+          rowsArr.push({
+            number: patientNumber,
+            id,
+            fullName,
+            createdOn: formattedDate,
+            treatments: treatments || [],
+          });
+        }
+      );
       setRows(rowsArr);
     }
   }, [patientData, currClinic, clinics]);
-
-  console.log(patientData);
 
   const columns: GridColDef[] = [
     { field: 'number', headerName: 'Number', width: 200 },
@@ -68,32 +70,15 @@ const Records = () => {
   if (patientData) {
     return (
       <>
-        <div className="p-10 w-full space-y-8">
-          <div className="flex items-center space-x-10 font-bold">
+        <div className="p-10 w-full space-y-8 drop-shadow-md">
+          <div className="flex items-center justify-between">
             <BackButton />
-            <div className="space-x-4 flex items-center">
-              <button>
-                <img className="h-8" src={cloudBtn} alt="search button" />
-              </button>
-              <p>Sync Records on Cloud</p>
-            </div>
+            <h1 className="text-primary text-xl font-bold">
+              {currClinic?.name}
+            </h1>
           </div>
           <div className="text-3xl">
             <StripedDataGrid
-              sx={{
-                '.MuiDataGrid-cellContent': {
-                  fontSize: '1.1rem',
-                  cursor: 'default',
-                },
-                '.MuiDataGrid-columnHeaderTitleContainer': {
-                  fontSize: '1.4rem',
-                  fontStyle: 'bold',
-                },
-                '.MuiDataGrid-root, .MuiDataGrid-root--densityStandard': {
-                  maxWidth: 'fit-content',
-                  minWidth: 'fit-content',
-                },
-              }}
               getRowClassName={(params) =>
                 params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
               }

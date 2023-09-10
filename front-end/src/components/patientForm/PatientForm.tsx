@@ -7,11 +7,11 @@ import {
 } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { closeBtn, check, plus } from '../../assets';
+import { closeBtn, check, plus } from '../../../assets';
 import FormFieldError from './FormFieldError';
 import DentistForm from './DentistForm';
 import {
-  PatientDataContextType,
+  ContextType,
   PatientData,
   CreatePatientData,
   ImageUpload,
@@ -19,7 +19,16 @@ import {
 import { useAppContext } from 'features/AppContext';
 import { toast } from 'react-toastify';
 import { capitalize } from 'utils/capitilize';
-import { collection, addDoc, Timestamp, doc } from '@firebase/firestore';
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  doc,
+  updateDoc,
+  arrayUnion,
+  DocumentReference,
+  getDoc,
+} from '@firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { uploadFile } from 'utils/uploadFiles';
 
@@ -33,8 +42,9 @@ const PatientForm = ({
     clinics,
     currClinic,
     updateClinic,
+    saveImage,
     getPatients,
-  } = useAppContext() as PatientDataContextType;
+  } = useAppContext() as ContextType;
   const [isAddingDentist, setIsAddingDentist] = useState<boolean>(false);
   const navigate = useNavigate();
   const {
@@ -45,39 +55,61 @@ const PatientForm = ({
     watch,
     setValue,
   } = useForm<CreatePatientData>();
-
-  const uploadedFiles: FileList | ImageUpload[] = watch('imageUploads'); // Access the uploaded files using the watch function
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const uploadedFiles: File[] = watch('imageUploads'); // Access the uploaded files using the watch function
 
   const patientCollection = collection(db, 'patients');
+  const imagesCollection = collection(db, 'images');
 
   const onSubmit = async (data: CreatePatientData) => {
     const toastId = toast.loading('Saving record...');
-
+    setIsLoading(toast.isActive(toastId));
     try {
+      const internetStatus = navigator.onLine;
       const imgs = await Promise.all(
-        await Array.from(data.imageUploads).map((file) => uploadFile(file))
+        Array.from(data.imageUploads).map((file) => uploadFile(file))
       );
-      const birthDate = new Date(data.dateOfBirth).toISOString().slice(0, 10);
+      console.log('imgs', imgs);
+      const dateOfBirth = new Date(data.dateOfBirth).toISOString().slice(0, 10);
+      const dentist = doc(collection(db, 'dentists'), data.dentist);
 
       const formData = {
         // clinic: `/clinics/${currClinic}`,
         firstName: capitalize(data.firstName),
         middleName: capitalize(data.middleName),
         lastName: capitalize(data.lastName),
-        dateOfBirth: birthDate,
+        dateOfBirth,
         gender: data.gender,
         address: data.address,
-        dentist: doc(collection(db, 'dentists'), data.dentist),
+        dentist,
         contactNumber: data.contactNumber,
-        imageUploads: imgs || [],
+        // imageUploads: internetStatus ? imgs : [], // prod
+        imageUploads: [],
         createdOn: Timestamp.now(),
       };
-
-      const newPatientRef = await addDoc(patientCollection, formData);
-
-      updateClinic(newPatientRef, 'patients');
-      getPatients();
-      navigate(`/${currClinic}/detection/${newPatientRef.id}`);
+      console.log(formData);
+      let newPatientRef: DocumentReference;
+      let newPatientID;
+      // ONLINE
+      if (internetStatus) {
+        newPatientRef = await addDoc(patientCollection, formData);
+        newPatientID = newPatientRef.id;
+        updateClinic(newPatientRef, 'patients');
+        imgs.map(async (img: any) => {
+          const imgRef = await addDoc(imagesCollection, img);
+          updateDoc(newPatientRef, {
+            imageUploads: arrayUnion(imgRef),
+          });
+        });
+        // await getPatients(clinics);
+        navigate(`/${currClinic?.id}/detection/${newPatientID}`);
+      }
+      // OFFLINE
+      else {
+        addDoc(patientCollection, formData);
+        // saveImage();
+        navigate(`/${currClinic?.id}/records`);
+      }
 
       toast.update(toastId, {
         render: 'Record saved',
@@ -88,6 +120,7 @@ const PatientForm = ({
 
       reset();
     } catch (e) {
+      console.log(e);
       toast.update(toastId, {
         render: 'An error occured saving your record. Try reloading.',
         type: 'error',
@@ -325,6 +358,7 @@ const PatientForm = ({
                 <a className="font-bold"> Privacy Policy</a>
               </p>
               <button
+                disabled={isLoading}
                 className="text-xl bg-primary py-3 px-6 w-fit font-bold block text-white rounded-lg transition-all duration-500 ease-out"
                 type="submit"
               >

@@ -7,10 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function App() {
   return (
     <>
-      <ToastContainer />
-      <AppProvider>
-        <Landing />
-        <Router>
+      <ToastContainer limit={1} />
+      <Landing />
+      <Router>
+        <AppProvider>
           <Routes>
             {/* <Route path="/" element={<Menu />} />
             <Route path="/detection/:id" element={<Detection />} />
@@ -21,8 +21,8 @@ export default function App() {
             <Route path="/:clinic/records" element={<Records />} />
             <Route path="/:clinic/records/:id" element={<ShowPatientInfo />} />
           </Routes>
-        </Router>
-      </AppProvider>
+        </AppProvider>
+      </Router>
     </>
   );
 }

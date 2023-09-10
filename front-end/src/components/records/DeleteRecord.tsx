@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType } from 'utils/Interfaces';
+import { ContextType } from 'utils/Interfaces';
 import { toast } from 'react-toastify';
 import { doc, deleteDoc } from '@firebase/firestore';
 import { db } from 'utils/firebase-config';
@@ -15,8 +15,7 @@ const DeleteRecord = ({
 }) => {
   const navigate = useNavigate();
   const { clinic } = useParams();
-  const { currPatient, getPatients, deletePatientOnClinic } =
-    useAppContext() as PatientDataContextType;
+  const { currPatient, deletePatientOnClinic } = useAppContext() as ContextType;
   const storage = getStorage();
 
   const handleConfirmedDeletion = async () => {
@@ -25,19 +24,19 @@ const DeleteRecord = ({
       // 1. Delete images saved on the patient record
       const imageUploads = currPatient?.imageUploads!;
 
-      if (imageUploads && imageUploads.length > 0) {
-        toast.update(toastId, {
-          render: 'Deleting dectection images',
-          type: 'info',
-          isLoading: true,
-        });
-        for (let img of imageUploads!) {
-          const imgRef = ref(storage, `images/${img.name}`);
+      // if (imageUploads && imageUploads.length > 0) {
+      //   toast.update(toastId, {
+      //     render: 'Deleting dectection images',
+      //     type: 'info',
+      //     isLoading: true,
+      //   });
+      //   for (let img of imageUploads!) {
+      //     const imgRef = ref(storage, `images/${img.name}`);
 
-          // Delete the file
-          await deleteObject(imgRef);
-        }
-      }
+      //     // Delete the file
+      //     await deleteObject(imgRef);
+      //   }
+      // }
 
       const recordRef = doc(db, 'patients', currPatient?.id!);
       // 2. Delete the patient on clinic records.

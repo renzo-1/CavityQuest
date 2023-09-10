@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { arrow, closeBtn, trash } from '../assets';
+import { arrow, closeBtn, trash } from '../../assets';
 import { image } from '@tensorflow/tfjs';
 
 const Carousel = ({
@@ -60,7 +60,7 @@ const Carousel = ({
 
   return (
     <div className="absolute top-0 left-0 h-screen w-full border flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-[640px] h-[640px] border border-red-500 flex relative">
+      <div className="w-[640px] h-[640px] border border-red-500 flex relative overflow-hidden">
         <button
           onClick={closeCarousel}
           className="z-50 absolute top-[5%] right-[5%] transition-all duration-500 ease-out"

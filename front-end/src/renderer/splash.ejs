@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline'"
+    />
+    <link />
+    <title>Cavity Quest</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div class="container">
+      <span class="loader"></span>
+      <h1>Cavity Quest</h1>
+      <p>Your AI-powered dental detective</p>
+    </div>
+  </body>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      width: 1024px;
+      height: 728px;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      background: #000;
+    }
+    h1,
+    p {
+      font-family: Roboto;
+      color: white;
+    }
+    h1 {
+      font-size: 4.5rem;
+      font-weight: bolder;
+      margin-bottom: 0.4rem;
+    }
+    p {
+      font-size: 1.25rem;
+    }
+
+    .loader {
+      margin-bottom: 0.7rem;
+      transform: rotateZ(45deg);
+      perspective: 1000px;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      color: #fff;
+    }
+    .loader:before,
+    .loader:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: inherit;
+      height: inherit;
+      border-radius: 50%;
+      transform: rotateX(70deg);
+      animation: 1s spin linear infinite;
+    }
+    .loader:after {
+      color: #ff3d00;
+      transform: rotateY(70deg);
+      animation-delay: 0.4s;
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: translate(-50%, -50%) rotateZ(0deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotateZ(360deg);
+      }
+    }
+
+    @keyframes rotateccw {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+      }
+    }
+
+    @keyframes spin {
+      0%,
+      100% {
+        box-shadow: 0.2em 0px 0 0px currentcolor;
+      }
+      12% {
+        box-shadow: 0.2em 0.2em 0 0 currentcolor;
+      }
+      25% {
+        box-shadow: 0 0.2em 0 0px currentcolor;
+      }
+      37% {
+        box-shadow: -0.2em 0.2em 0 0 currentcolor;
+      }
+      50% {
+        box-shadow: -0.2em 0 0 0 currentcolor;
+      }
+      62% {
+        box-shadow: -0.2em -0.2em 0 0 currentcolor;
+      }
+      75% {
+        box-shadow: 0px -0.2em 0 0 currentcolor;
+      }
+      87% {
+        box-shadow: 0.2em -0.2em 0 0 currentcolor;
+      }
+    }
+  </style>
+</html>

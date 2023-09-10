@@ -168,51 +168,23 @@ const configuration: webpack.Configuration = {
       isDevelopment: process.env.NODE_ENV !== 'production',
       nodeModules: webpackPaths.appNodeModulesPath,
     }),
-
+    new HtmlWebpackPlugin({
+      filename: path.join('splash.html'),
+      template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+    }),
     new NodePolyfillPlugin(),
     new CopyPlugin({
       // Use copy plugin to copy *.wasm to output folder.
       patterns: [
-        // {
-        //   from: './node_modules/onnxruntime-web/dist/*.wasm',
-        //   to: '[name][ext]',
-        // },
-        // {
-        //   from: './src/models/model_640x640_epoch054.ort',
-        //   to: 'model_640x640.ort',
-        // },
-        // {
-        //   from: './src/models/model_256x256_epoch054.ort',
-        //   to: 'model_256x256.ort',
-        // },
-        // {
-        //   from: './src/models/sample.onnx',
-        //   to: 'sample.onnx',
-        // },
-        // {
-        //   from: './src/models/epoch_054.onnx',
-        //   to: 'epoch_054.onnx',
-        // },
-        // {
-        //   from: './src/models/model_256x256_best.onnx',
-        //   to: 'model_256x256_best.onnx',
-        // },
-        // {
-        //   from: './src/models/model_640x640_best.ort',
-        //   to: 'model_256x256_best.ort',
-        // },
-        // {
-        //   from: './src/models/model_best.ort',
-        //   to: 'model_best.ort',
-        // },
-        // {
-        //   from: './src/models/model_best.ort',
-        //   to: 'model_best.onnx',
-        // },
-        // {
-        //   from: './src/models/tfjs/model.json',
-        //   to: 'model_best.json',
-        // },
         {
           from: './src/models/tfjs/model.json',
           to: 'model.json',

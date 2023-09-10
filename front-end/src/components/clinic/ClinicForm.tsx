@@ -1,8 +1,8 @@
 import React, { useState, ChangeEvent, useRef } from 'react';
-import { closeBtn, plusWhite } from '../../assets';
+import { closeBtn, plusWhite } from '../../../assets';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType } from 'utils/Interfaces';
+import { ContextType } from 'utils/Interfaces';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -22,31 +22,45 @@ const ClinicForm = () => {
   } = useForm<{ name: string }>();
 
   const { currClinic, setCurrClinic, clinics, dentists } =
-    useAppContext() as PatientDataContextType;
+    useAppContext() as ContextType;
   const clinicCollection = collection(db, 'clinics');
 
   const handleClinicChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setCurrClinic(e.target.value);
+    for (let clinic of clinics) {
+      if (clinic.id === e.target.value) {
+        setCurrClinic(clinic);
+      }
+    }
   };
   const onSubmit = async (data: { name: string }) => {
     const toastId = toast.loading('Saving clinic...');
 
     try {
-      const newClinicRef = await addDoc(clinicCollection, {
-        name: data.name,
-        patients: [],
-        dentists: [],
-      });
+      const internetStatus = navigator.onLine;
+      let newClinicRef;
+      let newClinicID;
 
-      setCurrClinic(newClinicRef.id);
-
+      if (internetStatus) {
+        newClinicRef = await addDoc(clinicCollection, {
+          name: data.name,
+          patients: [],
+          dentists: [],
+        });
+        // newClinicID = newClinicRef.id;
+        // setCurrClinic(newClinicRef.id);
+      } else {
+        newClinicRef = addDoc(clinicCollection, {
+          name: data.name,
+          patients: [],
+          dentists: [],
+        });
+      }
       toast.update(toastId, {
         render: 'Clinic saved',
         type: 'success',
         autoClose: 1000,
         isLoading: false,
       });
-
       setShow(false);
 
       reset();
@@ -58,32 +72,13 @@ const ClinicForm = () => {
         isLoading: false,
       });
     }
-    // axios
-    //   .post('http://127.0.0.1:8000/api/clinics/', data, {
-    //     headers: { 'Content-Type': 'multipart/form-data' },
-    //   })
-    //   .then((res: any) => {
-    //     // setIsNewData((prev) => !prev);
-    //     // console.log(res.data)
-    //     setCurrClinic(res.data.id);
-    //     setShow(false);
-    //     toast.success('Successfully saved', {
-    //       autoClose: 5000,
-    //     });
-    //     reset();
-    //   })
-    //   .catch((err) => {
-    //     toast.error('There was an error saving the record. Please try again', {
-    //       autoClose: 5000,
-    //     });
-    //   });
   };
   return (
     <>
       <div className="absolute top-0 left-0 w-full z-20 flex justify-end p-10 space-x-4 text-lg font-bold white-select">
         <select
           onChange={handleClinicChange}
-          value={currClinic}
+          value={currClinic?.id}
           className=" rounded-lg px-6 pr-10 py-2 bg-black bg-opacity-50 shadow-md text-white"
         >
           {clinics.map((clinic) => (

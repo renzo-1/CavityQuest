@@ -1,29 +1,40 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { windowsStore } from 'process';
 
 export type Channels = 'ipc-example';
 
 const electronHandler = {
-  ipcRenderer: {
-    sendMessage(channel: Channels, ...args: unknown[]) {
-      ipcRenderer.send(channel, ...args);
-    },
-    on(channel: Channels, func: (...args: unknown[]) => void) {
-      const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
-        func(...args);
-      ipcRenderer.on(channel, subscription);
+  send: (channel: string, data: any) => {
+    // whitelist channels
+    let validChannels = ['toMain'];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, data);
+    }
+  },
 
-      return () => {
-        ipcRenderer.removeListener(channel, subscription);
-      };
-    },
-    once(channel: Channels, func: (...args: unknown[]) => void) {
-      ipcRenderer.once(channel, (_event, ...args) => func(...args));
-    },
+  receive: (channel: string, func: any) => {
+    let validChannels = ['fromMain'];
+    if (validChannels.includes(channel)) {
+      // Deliberately strip event as it includes `sender`
+      ipcRenderer.on(channel, (event, ...args) => func(...args));
+    }
+  },
+  getEnv: async function () {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.send('get-env');
+      ipcRenderer.on('get-env-reply', (event, arg) => {
+        resolve(arg.parsed);
+      });
+      // return reject('Error retrieving env variables');
+    });
+  },
+  cleanEnvListners: function () {
+    ipcRenderer.removeAllListeners('get-env');
+    ipcRenderer.removeAllListeners('get-env-reply');
   },
 };
-
-contextBridge.exposeInMainWorld('electron', electronHandler);
-
+// contextBridge.exposeInMainWorld('electron', electronHandler);
+contextBridge.exposeInMainWorld('api', electronHandler);
 export type ElectronHandler = typeof electronHandler;

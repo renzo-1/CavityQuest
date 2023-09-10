@@ -48,7 +48,39 @@ const configuration: webpack.Configuration = {
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
       analyzerPort: 8888,
     }),
-
+    new CopyPlugin({
+      // Use copy plugin to copy *.wasm to output folder.
+      patterns: [
+        {
+          from: './src/models/tfjs/model.json',
+          to: 'model.json',
+        },
+        {
+          from: './src/models/tfjs/group1-shard1of6.bin',
+          to: 'group1-shard1of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard2of6.bin',
+          to: 'group1-shard2of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard3of6.bin',
+          to: 'group1-shard3of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard4of6.bin',
+          to: 'group1-shard4of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard5of6.bin',
+          to: 'group1-shard5of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard6of6.bin',
+          to: 'group1-shard6of6.bin',
+        },
+      ],
+    }),
     /**
      * Create global constants which can be configured at compile time.
      *

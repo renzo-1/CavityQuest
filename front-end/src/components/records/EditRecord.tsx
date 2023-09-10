@@ -1,25 +1,14 @@
-import React, {
-  FormEvent,
-  useEffect,
-  useState,
-  ChangeEvent,
-  MouseEventHandler,
-} from 'react';
-import axios from 'axios';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import {
-  PatientData,
-  PatientDataContextType,
-  PatientDataKind,
-} from 'utils/Interfaces';
+import { ContextType } from 'utils/Interfaces';
 import { useAppContext } from 'features/AppContext';
 import { treatments } from 'data/treatments';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { doc, collection, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from 'utils/firebase-config';
-import { formatPatientData } from 'utils/formatPatientData';
+
 interface EditProps {
   note: string;
   treatments: string[] | null;
@@ -27,15 +16,8 @@ interface EditProps {
 const EditRecord = () => {
   const { id: idParam } = useParams();
 
-  const {
-    currPatient,
-    currClinic,
-    dentists,
-    setCurrPatient,
-    setPatientData,
-    clinics,
-    patientData,
-  } = useAppContext() as PatientDataContextType;
+  const { currPatient, setCurrPatient, setPatientData, clinics } =
+    useAppContext() as ContextType;
 
   const [checkboxValues, setCheckboxValues] = useState<string[]>(
     currPatient?.treatments! || []
@@ -63,8 +45,7 @@ const EditRecord = () => {
 
     const setDentistField = async () => {
       if (currPatient?.dentist) {
-        const dentistSnap = await getDoc(currPatient?.dentist);
-        setDentist(dentistSnap.data()?.name || '');
+        setDentist(currPatient?.dentist);
       }
     };
 
@@ -81,10 +62,17 @@ const EditRecord = () => {
         const patientRef = doc(db, 'patients', id);
         const patientSnap = await getDoc(patientRef);
 
-        await updateDoc(patientRef, {
-          note: data.note,
-          treatments: data.treatments,
-        });
+        if (navigator.onLine) {
+          await updateDoc(patientRef, {
+            note: data.note,
+            treatments: data.treatments,
+          });
+        } else {
+          updateDoc(patientRef, {
+            note: data.note,
+            treatments: data.treatments,
+          });
+        }
 
         setPatientData((prevData) => {
           const newArr = prevData.filter(

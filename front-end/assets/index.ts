@@ -12,6 +12,8 @@ import trash from './icons/trash.svg';
 import plus from './icons/plus.svg';
 import plusWhite from './icons/plus-white.svg';
 import check from './icons/check.svg';
+import closeWhite from './icons/closeWhite.svg';
+import list from './icons/list.svg';
 export {
   detection,
   records,
@@ -26,4 +28,6 @@ export {
   plus,
   plusWhite,
   check,
+  closeWhite,
+  list,
 };

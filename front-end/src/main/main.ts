@@ -9,12 +9,13 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, ContextBridge } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-
+import { mkdir, writeFile, readFile, unlink, readdir } from 'node:fs/promises';
+import { existsSync } from 'fs';
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -71,22 +72,38 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1080,
+    width: 1024,
+    height: 728,
     minWidth: 720,
     minHeight: 1080,
+    fullscreenable: true,
+    center: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       webgl: true,
       preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
+        ? path.join(__dirname, 'preload.ts')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
 
+  const splash = new BrowserWindow({
+    titleBarStyle: 'hidden',
+    width: 1024,
+    height: 728,
+    center: true,
+    frame: false,
+    alwaysOnTop: true,
+    resizable: false,
+  });
+
+  splash.loadURL(resolveHtmlPath('splash.html'));
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
+    try {
+      splash.destroy();
+    } catch (e) {}
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -138,3 +155,51 @@ app
     });
   })
   .catch(console.log);
+
+
+ipcMain.on('get-env', (event) => {
+  mainWindow?.webContents.send('get-env-reply', require('dotenv').config());
+});
+
+ipcMain.on('toMain', async (event, { method, fileName, file }) => {
+  let msg;
+
+  try {
+    const path = `${app.getPath('userData')}/offlineImageUploads/`;
+    // check if folder path is exists
+    if (!existsSync(path)) {
+      await mkdir(path);
+    }
+    // if (!existsSync(`${path}/offlineUploadsTrack.json`)) {
+    //   await writeFile(`${path}/offlineUploadsTrack.json`, '[]', 'utf-8');
+    // }
+    if (method == 'read') {
+      msg = await readFile(file, 'base64');
+    } else if (method == 'write') {
+      await writeFile(`${path}/${fileName}.jpg`, file);
+
+      // json = await readFile(`${path}/offlineUploadsTrack.json`, 'utf-8');
+
+      // const jsonData = JSON.parse(json);
+      // const newData = jsonData.push({
+      //   url: `${path}/${fileName}`,
+      //   name: fileName,
+      // });
+
+      // await writeFile(`${path}/${fileName}`, newData, 'utf-8');
+
+      msg = `${path}/${fileName}.jpg`;
+    } else if (method == 'delete') {
+      await unlink(fileName);
+      msg = 'successfully deleted image!';
+    } else if (method == 'dirIsNotEmpty') {
+      const files = await readdir(path);
+      msg = files.length > 0;
+    }
+  } catch (e) {
+    msg = e;
+  }
+
+  // Send result back to renderer process
+  mainWindow?.webContents.send('fromMain', msg);
+});

@@ -1,13 +1,13 @@
 import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
-import { check } from '../../assets';
+import { check } from '../../../assets';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { collection, addDoc } from '@firebase/firestore';
 import { capitalize } from 'utils/capitilize';
 import { db } from 'utils/firebase-config';
 import { useAppContext } from 'features/AppContext';
-import { PatientDataContextType } from 'utils/Interfaces';
-import { useParams } from 'react-router-dom';
+import { ContextType } from 'utils/Interfaces';
+
 
 interface Props {}
 
@@ -18,23 +18,38 @@ const DentistForm = ({
 }) => {
   const [newDentist, setNewDentist] = useState<string>('');
   const dentistsCollection = collection(db, 'dentists');
-  const { updateClinic } = useAppContext() as PatientDataContextType;
+  const { updateClinic } = useAppContext() as ContextType;
 
   const handleSubmit = async () => {
+    const toastID = toast.loading('Saving dentist...');
     try {
-      const dentistRef = await addDoc(dentistsCollection, {
-        name: capitalize(newDentist),
-      });
-
-      updateClinic(dentistRef, 'dentists');
+      if (navigator.onLine) {
+        const dentistRef = await addDoc(dentistsCollection, {
+          name: capitalize(newDentist),
+        });
+        updateClinic(dentistRef, 'dentists');
+      } else {
+        addDoc(dentistsCollection, {
+          name: capitalize(newDentist),
+        });
+      }
 
       setIsAddingDentist(false);
 
-      toast.success('New dentist has been saved', {
-        autoClose: 5000,
+      toast.update(toastID, {
+        render: 'Dentist saved',
+        type: 'success',
+        autoClose: 2000,
+        isLoading: false,
       });
     } catch (e) {
       console.log(e);
+      toast.update(toastID, {
+        render: 'An error occured saving your record. Try reloading.',
+        type: 'error',
+        autoClose: 2000,
+        isLoading: false,
+      });
     }
   };
 

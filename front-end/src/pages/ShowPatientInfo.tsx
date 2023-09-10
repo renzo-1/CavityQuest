@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton, PatientInfoField } from 'components';
-import { PatientDataContextType } from 'utils/Interfaces';
+import { ContextType } from 'utils/Interfaces';
 import ShowImageRecords from 'components/records/ShowImageRecords';
 import DeleteRecord from 'components/records/DeleteRecord';
 import EditRecord from 'components/records/EditRecord';
@@ -11,8 +11,8 @@ import formatDate from 'utils/formatDate';
 const ShowPatientInfo = () => {
   const navigate = useNavigate();
   const { id: idParam } = useParams();
-  const { patientData, setCurrPatient, currClinic, currPatient } =
-    useAppContext() as PatientDataContextType;
+  const { currClinic, currPatient } =
+    useAppContext() as ContextType;
   const [isDeleting, setIsDeleting] = useState<Boolean>(false);
 
   const handleDeletionState = () => {
@@ -27,14 +27,22 @@ const ShowPatientInfo = () => {
           <BackButton />
           <div className="space-x-4">
             <button
-              className="py-2 px-4 rounded-lg bg-red-500 font-bold text-white shadow-lg transition-all duration-500 ease-out"
+              disabled={!navigator.onLine}
+              className={`${
+                !navigator.onLine && 'bg-slate-400 tooltip'
+              }  py-2 px-4 rounded-lg bg-slate-500 font-bold text-white shadow-lg transition-all duration-500 ease-out`}
               onClick={handleDeletionState}
             >
               Delete
+              {!navigator.onLine && (
+                <span className="tooltiptext text-sm">
+                  You're not allowed to delete at this time.
+                </span>
+              )}
             </button>
             <button
               onClick={() => {
-                navigate(`/${currClinic}/detection/${idParam}`);
+                navigate(`/${currClinic?.id}/detection/${idParam}`);
               }}
               className="py-2 px-4 rounded-lg bg-blue-500 font-bold text-white shadow-lg transition-all duration-500 ease-out "
             >
@@ -47,7 +55,10 @@ const ShowPatientInfo = () => {
             <div className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2 ">
               <div className="flex justify-between">
                 <div className="space-y-4">
-                  <PatientInfoField field={'ID'} data={currPatient?.id} />
+                  <PatientInfoField
+                    field={'Patient Number'}
+                    data={currPatient?.patientNumber}
+                  />
                   <PatientInfoField
                     field={'Name'}
                     data={currPatient?.fullName}

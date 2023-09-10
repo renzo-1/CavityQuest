@@ -2,49 +2,96 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
-  listAll,
-  list,
   uploadString,
 } from 'firebase/storage';
 import { v4 } from 'uuid';
 import { Timestamp } from 'firebase/firestore';
-
+import { sendFile, receiveFile } from './offlineImageUploads';
 import { storage } from './firebase-config';
+
+const toBase64 = (file: File) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
 
 export const uploadFile = async (
   imageUpload: File | string,
   fileName?: string
 ) => {
-  if (imageUpload == null) return;
-  const dateNow = new Date(Date.now());
-
-  // FILE UPLOAD
-  if (!fileName && typeof imageUpload != 'string') {
-    const name = imageUpload.name + v4();
-    const imageRef = ref(storage, `images/${name}`);
-    const uploadedFile = {
-      name: name,
-      url: '',
-      createdOn: Timestamp.now(),
-    };
-    const snapshot = await uploadBytes(imageRef, imageUpload);
-    const URL = await getDownloadURL(snapshot.ref);
-    uploadedFile.url = URL;
-    return uploadedFile;
+  // const { currPatient } = useAppContext() as ContextType;
+  const internetStatus = navigator.onLine;
+  if (imageUpload == null) {
+    return;
   }
 
-  // DAT URL UPLOAD
+  // FILE UPLOAD. (File data has natural name field)
+  if (!fileName && typeof imageUpload != 'string') {
+    const name = v4() + imageUpload.name;
+    const offlineUrl = await toBase64(imageUpload);
+
+    // Offline upload
+    if (!internetStatus) {
+      // const imageArrBuffer = await imageUpload.arrayBuffer();
+      // sendFile( name, Buffer.from(imageArrBuffer));
+      // // returns file url
+      return {
+        offlineUrl,
+        onlineUrl: '',
+        createdOn: Timestamp.now(),
+      };
+    }
+    // Online upload
+    {
+      const imageRef = ref(storage, `images/${name}`);
+      const uploadedFile = {
+        onlineUrl: '',
+        offlineUrl,
+        createdOn: Timestamp.now(),
+      };
+      const snapshot = await uploadBytes(imageRef, imageUpload);
+      const URL = await getDownloadURL(snapshot.ref);
+      uploadedFile.onlineUrl = URL;
+      return uploadedFile;
+    }
+  }
+
+  // DATA URL UPLOAD
   if (typeof imageUpload == 'string') {
     const name = fileName + v4();
-    const imageRef = ref(storage, `images/${name}`);
-    const uploadedFile = {
-      name,
-      url: '',
-      createdOn: Timestamp.now(),
-    };
-    const snapshot = await uploadString(imageRef, imageUpload, 'data_url');
-    const URL = await getDownloadURL(snapshot.ref);
-    uploadedFile.url = URL;
-    return uploadedFile;
+    console.log('hello2');
+
+    // offline upload
+    // if (!internetStatus) { PROD
+    if (!internetStatus) {
+      // const buffer = Buffer.from(imageUpload.split(',')[1], 'base64');
+      // sendFile(name, buffer);
+      // // returns file url
+      // return {
+      //   url: await receiveFile(),
+      //   createdOn: Timestamp.now(),
+      //   local: true,
+      // };
+      return {
+        onlineUrl: '',
+        offlineUrl: imageUpload,
+        createdOn: Timestamp.now(),
+      };
+    }
+    // online upload
+    else {
+      const imageRef = ref(storage, `images/${name}`);
+      const uploadedFile = {
+        onlineUrl: '',
+        offlineUrl: imageUpload,
+        createdOn: Timestamp.now(),
+      };
+      const snapshot = await uploadString(imageRef, imageUpload, 'data_url');
+      const URL = await getDownloadURL(snapshot.ref);
+      uploadedFile.onlineUrl = URL;
+      return uploadedFile;
+    }
   }
 };

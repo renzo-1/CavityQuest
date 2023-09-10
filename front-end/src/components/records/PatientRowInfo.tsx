@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 const PatientRowInfo = ({
   id,
+  patientNumber,
   fullName,
   dateAdded,
   treatments,
 }: {
   id: number;
+  patientNumber: number;
   fullName?: string;
   dateAdded?: Date;
   treatments?: string[];
@@ -16,7 +18,7 @@ const PatientRowInfo = ({
   return (
     <>
       <div className="flex">
-        <p className="w-[50px]">{id}</p>
+        <p className="w-[50px]">{patientNumber}</p>
         <p className="">{fullName}</p>
       </div>
 

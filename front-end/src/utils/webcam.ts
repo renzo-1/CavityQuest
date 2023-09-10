@@ -36,7 +36,6 @@ export class WebcamOps {
             }
           });
       }
-      
     } catch (err) {
       alert("Can't open Webcam!");
     }
@@ -55,6 +54,6 @@ export class WebcamOps {
         track.stop();
       });
       console.log('webcam closed');
-    } else alert('Please open Webcam first!');
+    }
   };
 }

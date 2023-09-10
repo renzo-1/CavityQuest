@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { backBtn } from '../assets';
+import { backBtn } from '../../assets';
 
 const BackButton = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const BackButton = () => {
   };
 
   return (
-    <button className="w-8 " onClick={handleBack} >
+    <button className="w-8 " onClick={handleBack}>
       <img src={backBtn} alt="back button"></img>
     </button>
   );

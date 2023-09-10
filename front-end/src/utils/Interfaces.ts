@@ -7,17 +7,18 @@ enum GenderEnum {
   male = 'Male',
   other = 'other',
 }
-declare global {
-  interface File {
-    createdOn: Date;
-    url: string;
-  }
-}
+// declare global {
+//   interface File {
+//     createdOn: any;
+//     url: string;
+//     offlineUrl: string;
+//   }
+// }
 
-interface ImageUpload extends File {
+interface ImageUpload {
   createdOn: any;
-  name: string;
-  url: string;
+  onlineUrl: string;
+  offlineUrl: string;
 }
 type Timestamp = {
   nanoseconds: number;
@@ -31,35 +32,36 @@ interface PatientData {
   middleName: string;
   lastName: string;
   clinic: number;
-  dentist?: string;
+  dentist: string;
   dateOfBirth: string;
   address: string;
   contactNumber: string;
   gender: GenderEnum;
-  imageUploads: ImageUpload[];
+  imageUploads: DocumentReference[];
   note?: string;
   treatments?: string[];
   createdOn: Timestamp;
 }
 interface FormattedPatientData {
   id: string;
+  patientNumber: number;
   fullName: string;
   firstName: string;
   middleName: string;
   lastName: string;
   clinic: string;
-  dentist: DocumentReference;
+  dentist: string;
   dateOfBirth: string;
   address: string;
   contactNumber: string;
   gender: string;
-  imageUploads: ImageUpload[];
-  note: string;
-  treatments: string[];
+  imageUploads: DocumentReference[];
+  note?: string;
+  treatments?: string[];
   createdOn: Timestamp;
 }
 interface CreatePatientData extends Omit<PatientData, 'imageUploads'> {
-  imageUploads: FileList | ImageUpload[];
+  imageUploads: File[];
 }
 
 interface PatientResponseData {
@@ -83,11 +85,11 @@ interface DentistProps {
   id: string;
   name: string;
 }
-interface ClinicProps {
+interface Clinic {
   id: string;
   name: string;
-  patients: string[];
-  dentists: string[];
+  patients: DocumentReference[];
+  dentists: DocumentReference[];
 }
 
 enum PatientDataKind {
@@ -105,24 +107,27 @@ interface PatientDataAction {
   };
 }
 
-interface PatientDataContextType {
+interface ContextType {
   patientData: FormattedPatientData[];
   setPatientData: Dispatch<SetStateAction<FormattedPatientData[]>>;
   // dispatchPatientData: Dispatch<PatientDataAction>;
-  setShowClinics: Dispatch<SetStateAction<boolean>>;
-  showClinics: boolean;
+  setShowClinicsMenu: Dispatch<SetStateAction<boolean>>;
+  showClinicsMenu: boolean;
   currPatient: FormattedPatientData | undefined;
   setCurrPatient: Dispatch<SetStateAction<FormattedPatientData | undefined>>;
-  setCurrClinic: Dispatch<SetStateAction<any>>;
-  currClinic: any;
+  setCurrClinic: Dispatch<SetStateAction<Clinic | undefined>>;
+  currClinic?: Clinic;
   dentists?: DentistProps[];
   setDentists?: Dispatch<SetStateAction<DentistProps[] | undefined>>;
-  clinics: ClinicProps[];
+  clinics: Clinic[];
   updateClinic: (newDataRef: any, field: string) => {};
   getClinics: () => void;
-  getPatients: () => void;
-  getDentists: () => void;
+  getPatients: (clinic: Clinic[]) => Promise<void>;
+  // getDentists: () => void;
   deletePatientOnClinic: (newDataRef: DocumentReference) => void;
+  saveImage: (patientID?: string) => void;
+  images: ImageUpload[];
+  setImages: Dispatch<SetStateAction<ImageUpload[]>>;
 }
 
 type tableData = {
@@ -143,10 +148,10 @@ export {
   CreatePatientData,
   PatientData,
   PatientResponseData,
-  PatientDataContextType,
+  ContextType,
   ImageUpload,
   DentistProps,
-  ClinicProps,
+  Clinic,
   PatientDataKind,
   PatientDataAction,
   tableData,
