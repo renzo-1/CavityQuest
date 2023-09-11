@@ -11,21 +11,22 @@ import {
   updateDoc,
   doc,
   arrayUnion,
+  // @ts-ignore
   Timestamp,
   collection,
   addDoc,
 } from '@firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { uploadFile } from 'utils/uploadFiles';
-
 const Detection = () => {
   const { id } = useParams();
-  const { currClinic, getPatients, saveImage, getClinics, clinics, setImages } =
+  const { currClinic, getPatients, getClinics, addImageOffline } =
     useAppContext() as ContextType;
   const videoRef = useRef<HTMLVideoElement>(null);
   const webcamOps = new WebcamOps();
   const [captures, setCaptures] = useState<string[]>([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const imagesCollection = collection(db, 'images');
   const patientCollection = collection(db, 'patients');
@@ -33,6 +34,7 @@ const Detection = () => {
   const handleSubmit = async () => {
     if (captures.length < 1) return;
     const toastId = toast.loading('Saving detection...');
+    setIsLoading(true);
     try {
       const internetStatus = navigator.onLine;
       const imgs = await Promise.all(
@@ -47,8 +49,9 @@ const Detection = () => {
         if (!internetStatus) {
           imgs.map((img: any) => {
             addDoc(imagesCollection, img);
-            saveImage(id);
+            addImageOffline(img.name);
           });
+          getClinics();
           // await getPatients(clinics);
         }
         // ONLINE
@@ -72,7 +75,7 @@ const Detection = () => {
         });
 
         webcamOps.close(videoRef);
-
+        setIsLoading(false);
         navigate(`/${currClinic}/records/${id}`);
       }
     } catch (e) {
@@ -83,20 +86,23 @@ const Detection = () => {
         autoClose: 2000,
         isLoading: false,
       });
+      setIsLoading(false);
     }
   };
 
   return (
     <>
       <div className="p-10 h-screen relative w-full">
-        <Detect
-          videoRef={videoRef}
-          captures={captures}
-          handleSubmit={handleSubmit}
-          setCaptures={setCaptures}
-          setIsGalleryOpen={setIsGalleryOpen}
-          webcamOps={webcamOps}
-        />
+        {!isLoading && (
+          <Detect
+            videoRef={videoRef}
+            captures={captures}
+            handleSubmit={handleSubmit}
+            setCaptures={setCaptures}
+            setIsGalleryOpen={setIsGalleryOpen}
+            webcamOps={webcamOps}
+          />
+        )}
 
         {isGalleryOpen && (
           <Carousel

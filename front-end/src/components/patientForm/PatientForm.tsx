@@ -22,6 +22,7 @@ import { capitalize } from 'utils/capitilize';
 import {
   collection,
   addDoc,
+  // @ts-ignore
   Timestamp,
   doc,
   updateDoc,
@@ -42,8 +43,8 @@ const PatientForm = ({
     clinics,
     currClinic,
     updateClinic,
-    saveImage,
     getPatients,
+    addPatientOffline,
   } = useAppContext() as ContextType;
   const [isAddingDentist, setIsAddingDentist] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -60,7 +61,6 @@ const PatientForm = ({
 
   const patientCollection = collection(db, 'patients');
   const imagesCollection = collection(db, 'images');
-
   const onSubmit = async (data: CreatePatientData) => {
     const toastId = toast.loading('Saving record...');
     setIsLoading(toast.isActive(toastId));
@@ -107,7 +107,11 @@ const PatientForm = ({
       // OFFLINE
       else {
         addDoc(patientCollection, formData);
-        // saveImage();
+        addPatientOffline(
+          formData.firstName!,
+          formData.lastName!,
+          formData.middleName
+        );
         navigate(`/${currClinic?.id}/records`);
       }
 

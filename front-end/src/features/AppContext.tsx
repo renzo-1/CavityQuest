@@ -21,6 +21,7 @@ import {
   DocumentReference,
   arrayUnion,
   deleteDoc,
+  where,
 } from '@firebase/firestore';
 import { toast } from 'react-toastify';
 import { formatPatientData } from 'utils/formatPatientData';
@@ -123,18 +124,29 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
           clinic.patients.map(
             async (patientRef: DocumentReference, index: number) => {
               const docSnap = await getDoc(patientRef);
+
               if (docSnap.exists()) {
                 const data: any = docSnap.data();
-                patientsArr.push(
-                  formatPatientData(data, docSnap.id, index + 1, currClinic?.id)
-                );
+                const dentist = await getDoc(data.dentist);
+                const dentistData = dentist.data() as DentistProps;
+                if (dentist.exists()) {
+                  patientsArr.push(
+                    formatPatientData(
+                      data,
+                      dentistData.name!,
+                      docSnap.id,
+                      index + 1,
+                      currClinic?.id
+                    )
+                  );
+                }
               }
             }
           )
         );
       }
-      console.log('patientsARR', patientsArr);
-      setPatientData([...patientsArr]);
+      console.log('patientsArr', patientsArr);
+      setPatientData(patientsArr);
     } catch (e) {
       console.log(e);
     }
@@ -153,10 +165,13 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             if (docSnap.exists()) {
               const data: DentistProps = docSnap.data() as DentistProps;
               dentistsArr.push({ id: docSnap.id, name: data.name });
+            } else {
+              console.log('dentist does not exist :', docSnap);
             }
           })
         );
       }
+      console.log('dentistarr,', dentistsArr);
       setDentists([...dentistsArr]);
     } catch (e) {
       console.log(e);
@@ -201,16 +216,16 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
         name: doc.data().name,
         id: doc.id,
       }));
-      console.log('hello1 ');
       setClinics(clinicSnap);
-      getPatients(clinicSnap); 
+      getPatients(clinicSnap);
       getDentists(clinicSnap);
     });
+    // cleanSnapShot();
   };
 
   useEffect(() => {
     getClinics();
-  }, [currClinic?.id]);
+  }, [currClinic]);
 
   // ONLINE: Clinic updates for patients and dentists
   const updateClinic = async (newDataRef: DocumentReference, field: string) => {
@@ -219,20 +234,42 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
       const clinicSnap = await getDoc(clinicRef);
 
       if (clinicSnap.exists()) {
-        // if patient or dentist array already exists in the current clinic
         await updateDoc(clinicRef, { [field]: arrayUnion(newDataRef) });
-        // if no records for patient and dentist for the current clinic
       }
     }
   };
 
   // OFFLINE: listen for patients creations, and append it to current clinic
-  useEffect(() => {
-    const q = query(patientsCollection);
+  // useEffect(() => {
+  //   const q = query(patientsCollection);
+  //   if (!navigator.onLine) {
+  //     onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+  //       snapshot.docChanges().forEach(async (change) => {
+  //         if (change.type === 'added' && currClinic) {
+  //           const clinicRef = doc(clinicsCollection, currClinic?.id);
+  //           updateDoc(clinicRef, {
+  //             patients: arrayUnion(change.doc.ref),
+  //           });
+  //           // saveImage(change.doc.id);
+  //           // getClinics();
+  //         }
+  //       });
+  //     });
+  //   }
+  // }, []);
+  const addPatientOffline = (fName: string, lName: string, mName?: string) => {
     if (!navigator.onLine) {
+      const q = query(patientsCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
-          if (change.type === 'added' && currClinic) {
+          const { firstName, middleName, lastName } = change.doc.data();
+          if (
+            change.type === 'added' &&
+            currClinic &&
+            firstName == fName &&
+            middleName == mName &&
+            lastName == lName
+          ) {
             const clinicRef = doc(clinicsCollection, currClinic?.id);
             updateDoc(clinicRef, {
               patients: arrayUnion(change.doc.ref),
@@ -243,15 +280,19 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
         });
       });
     }
-  }, []);
-
+  };
   // OFFLINE: listens for dentists creations, and append it to current clinic
-  useEffect(() => {
+  const addDentistOffline = (dentistName: string) => {
     if (!navigator.onLine) {
       const q = query(dentistsCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-        snapshot.docChanges().forEach(async (change) => {
-          if (change.type === 'added' && currClinic) {
+        snapshot.docChanges().forEach(async (change, index) => {
+          console.log(change.doc.data().name == dentistName);
+          if (
+            change.type === 'added' &&
+            currClinic &&
+            change.doc.data().name == dentistName
+          ) {
             const clinicRef = doc(clinicsCollection, currClinic?.id);
             updateDoc(clinicRef, {
               dentists: arrayUnion(change.doc.ref),
@@ -261,20 +302,24 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
         });
       });
     }
-  }, []);
+  };
 
   // // OFFLINE: listen for image creations, and append it to current patient
-  const saveImage = (patientId?: string) => {
+  const addImageOffline = (name: string) => {
     if (!navigator.onLine) {
       const q = query(imagesCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
-          if (change.type === 'added' && currPatient && currPatient.id) {
+          if (
+            change.type === 'added' &&
+            currPatient &&
+            currPatient.id &&
+            change.doc.data().name == name
+          ) {
             const patientRef = doc(patientsCollection, currPatient.id);
             updateDoc(patientRef, {
               imageUploads: arrayUnion(change.doc.ref),
             });
-            // getClinics();
           } else {
             console.log('no image upload changes');
           }
@@ -282,12 +327,6 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
       });
     }
   };
-
-  useEffect(() => {
-    if (!navigator.onLine) {
-      saveImage();
-    }
-  }, []);
 
   const deletePatientOnClinic = async (
     deletedPatientRef: DocumentReference
@@ -322,9 +361,11 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             getClinics,
             updateClinic,
             deletePatientOnClinic,
-            saveImage,
             images,
             setImages,
+            addImageOffline,
+            addDentistOffline,
+            addPatientOffline,
           }}
         >
           {isLoading && (

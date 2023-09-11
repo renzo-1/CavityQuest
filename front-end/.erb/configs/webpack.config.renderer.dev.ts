@@ -82,9 +82,26 @@ const configuration: webpack.Configuration = {
       },
       {
         test: /\.s?css$/,
-        use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+        use: [
+          'style-loader',
+          'css-loader',
+          'sass-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('tailwindcss'), require('autoprefixer')],
+              },
+            },
+          },
+        ],
         exclude: /\.module\.s?(c|a)ss$/,
       },
+      // {
+      //   test: /\.s?css$/,
+      //   use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+      //   exclude: /\.module\.s?(c|a)ss$/,
+      // },
       // Fonts
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -95,10 +112,6 @@ const configuration: webpack.Configuration = {
         test: /\.(png|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
-      // MODEL
-      // {
-      //   test: /\.(onnx|ort)$/i,
-      // },
       // SVG
       {
         test: /\.svg$/,
@@ -168,19 +181,19 @@ const configuration: webpack.Configuration = {
       isDevelopment: process.env.NODE_ENV !== 'production',
       nodeModules: webpackPaths.appNodeModulesPath,
     }),
-    new HtmlWebpackPlugin({
-      filename: path.join('splash.html'),
-      template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true,
-      },
-      isBrowser: false,
-      env: process.env.NODE_ENV,
-      isDevelopment: process.env.NODE_ENV !== 'production',
-      nodeModules: webpackPaths.appNodeModulesPath,
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: path.join('splash.html'),
+    //   template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
+    //   minify: {
+    //     collapseWhitespace: true,
+    //     removeAttributeQuotes: true,
+    //     removeComments: true,
+    //   },
+    //   isBrowser: false,
+    //   env: process.env.NODE_ENV,
+    //   isDevelopment: process.env.NODE_ENV !== 'production',
+    //   nodeModules: webpackPaths.appNodeModulesPath,
+    // }),
     new NodePolyfillPlugin(),
     new CopyPlugin({
       // Use copy plugin to copy *.wasm to output folder.

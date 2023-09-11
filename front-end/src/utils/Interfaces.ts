@@ -1,7 +1,10 @@
 import { Data } from 'electron';
 import { Url } from 'url';
 import React, { Dispatch, SetStateAction } from 'react';
-import { DocumentReference } from 'firebase/firestore';
+import {
+  DocumentReference,
+} from 'firebase/firestore'
+;
 enum GenderEnum {
   female = 'Female',
   male = 'Male',
@@ -19,6 +22,7 @@ interface ImageUpload {
   createdOn: any;
   onlineUrl: string;
   offlineUrl: string;
+  name: string;
 }
 type Timestamp = {
   nanoseconds: number;
@@ -120,14 +124,16 @@ interface ContextType {
   dentists?: DentistProps[];
   setDentists?: Dispatch<SetStateAction<DentistProps[] | undefined>>;
   clinics: Clinic[];
-  updateClinic: (newDataRef: any, field: string) => {};
+  updateClinic: (newDataRef: DocumentReference, field: string) => {};
   getClinics: () => void;
   getPatients: (clinic: Clinic[]) => Promise<void>;
   // getDentists: () => void;
   deletePatientOnClinic: (newDataRef: DocumentReference) => void;
-  saveImage: (patientID?: string) => void;
   images: ImageUpload[];
   setImages: Dispatch<SetStateAction<ImageUpload[]>>;
+  addDentistOffline: (dentistName: string) => void;
+  addImageOffline: (name: string) => void;
+  addPatientOffline: (fName: string, lName: string, mName?: string) => void;
 }
 
 type tableData = {
@@ -156,6 +162,5 @@ export {
   PatientDataAction,
   tableData,
   columns,
-  Timestamp,
   FormattedPatientData,
 };

@@ -2,14 +2,11 @@ import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import { check } from '../../../assets';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { collection, addDoc } from '@firebase/firestore';
+import { collection, addDoc, doc } from '@firebase/firestore';
 import { capitalize } from 'utils/capitilize';
 import { db } from 'utils/firebase-config';
 import { useAppContext } from 'features/AppContext';
 import { ContextType } from 'utils/Interfaces';
-
-
-interface Props {}
 
 const DentistForm = ({
   setIsAddingDentist,
@@ -18,24 +15,31 @@ const DentistForm = ({
 }) => {
   const [newDentist, setNewDentist] = useState<string>('');
   const dentistsCollection = collection(db, 'dentists');
-  const { updateClinic } = useAppContext() as ContextType;
+  const { updateClinic, addDentistOffline, getClinics } =
+    useAppContext() as ContextType;
 
   const handleSubmit = async () => {
     const toastID = toast.loading('Saving dentist...');
+    const captDentistName = capitalize(newDentist);
     try {
+      // ONLINE
       if (navigator.onLine) {
         const dentistRef = await addDoc(dentistsCollection, {
-          name: capitalize(newDentist),
+          name: captDentistName,
         });
         updateClinic(dentistRef, 'dentists');
-      } else {
+      }
+      // OFFLINE
+      else {
         addDoc(dentistsCollection, {
           name: capitalize(newDentist),
         });
+        // updateClinic(dentistRef, 'dentists');
+        addDentistOffline(captDentistName!);
+        getClinics();
       }
 
       setIsAddingDentist(false);
-
       toast.update(toastID, {
         render: 'Dentist saved',
         type: 'success',

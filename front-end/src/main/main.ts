@@ -82,27 +82,27 @@ const createWindow = async () => {
     webPreferences: {
       webgl: true,
       preload: app.isPackaged
-        ? path.join(__dirname, 'preload.ts')
+        ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
 
-  const splash = new BrowserWindow({
-    titleBarStyle: 'hidden',
-    width: 1024,
-    height: 728,
-    center: true,
-    frame: false,
-    alwaysOnTop: true,
-    resizable: false,
-  });
+  // const splash = new BrowserWindow({
+  //   titleBarStyle: 'hidden',
+  //   width: 1024,
+  //   height: 728,
+  //   center: true,
+  //   frame: false,
+  //   // alwaysOnTop: true,
+  //   resizable: false,
+  // });
 
-  splash.loadURL(resolveHtmlPath('splash.html'));
+  // splash.loadURL(resolveHtmlPath('splash.html'));
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
     try {
-      splash.destroy();
+      // splash.destroy();
     } catch (e) {}
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
@@ -119,7 +119,7 @@ const createWindow = async () => {
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  if (isDebug) menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -155,7 +155,6 @@ app
     });
   })
   .catch(console.log);
-
 
 ipcMain.on('get-env', (event) => {
   mainWindow?.webContents.send('get-env-reply', require('dotenv').config());

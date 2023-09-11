@@ -1,6 +1,7 @@
 import { FormattedPatientData, PatientData } from './Interfaces';
 export const formatPatientData = (
   data: PatientData,
+  dentist: string,
   id: string,
   patientNumber: number,
   currClinic: string
@@ -21,7 +22,7 @@ export const formatPatientData = (
     middleName: data.middleName,
     lastName: data.lastName,
     clinic: currClinic,
-    dentist: data.dentist,
+    dentist,
     dateOfBirth: data.dateOfBirth,
     address: data.address,
     contactNumber: data.contactNumber,

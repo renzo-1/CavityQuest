@@ -6,7 +6,6 @@ import searchBtn from './icons/search-btn.png';
 import filterBtn from './icons/filter-btn.png';
 import cloudBtn from './icons/cloud-btn.png';
 import closeBtn from './icons/x-lg.svg';
-import detectionSample from './DetectionSample.png';
 import arrow from './icons/arrow-right-circle-fill.svg';
 import trash from './icons/trash.svg';
 import plus from './icons/plus.svg';
@@ -22,7 +21,6 @@ export {
   filterBtn,
   cloudBtn,
   closeBtn,
-  detectionSample,
   arrow,
   trash,
   plus,

@@ -16,8 +16,14 @@ interface EditProps {
 const EditRecord = () => {
   const { id: idParam } = useParams();
 
-  const { currPatient, setCurrPatient, setPatientData, clinics } =
-    useAppContext() as ContextType;
+  const {
+    currPatient,
+    dentists,
+    setCurrPatient,
+    setPatientData,
+    clinics,
+    patientData,
+  } = useAppContext() as ContextType;
 
   const [checkboxValues, setCheckboxValues] = useState<string[]>(
     currPatient?.treatments! || []
@@ -43,13 +49,14 @@ const EditRecord = () => {
     setValue('note', currPatient?.note || '');
     setValue('treatments', currPatient?.treatments || []);
 
-    const setDentistField = async () => {
-      if (currPatient?.dentist) {
-        setDentist(currPatient?.dentist);
-      }
-    };
+    // const setDentistField = async () => {
+    //   if (currPatient?.dentist) {
+    //     const dentistSnap = await getDoc(currPatient?.dentist);
+    //     setDentist(dentistSnap.data()?.name || '');
+    //   }
+    // };
 
-    setDentistField();
+    // setDentistField();
   }, [currPatient?.treatments, currPatient?.note]);
 
   const { id } = useParams();
@@ -147,7 +154,9 @@ const EditRecord = () => {
         <div className="mb-2 justify-between flex">
           <div>
             <h3 className="text-sm">Dentist</h3>
-            <p className="font-bold text-xl rounded-lg">{dentist}</p>
+            <p className="font-bold text-xl rounded-lg">
+              {currPatient?.dentist}
+            </p>
           </div>
           <div>
             <h3 className="text-sm">Clinic</h3>

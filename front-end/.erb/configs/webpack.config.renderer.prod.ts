@@ -14,6 +14,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+import CopyPlugin from 'copy-webpack-plugin';
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -56,9 +57,22 @@ const configuration: webpack.Configuration = {
       },
       {
         test: /\.s?(a|c)ss$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('tailwindcss'), require('autoprefixer')],
+              },
+            },
+          },
+        ],
         exclude: /\.module\.s?(c|a)ss$/,
       },
+
       // Fonts
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -106,6 +120,39 @@ const configuration: webpack.Configuration = {
      * NODE_ENV should be production so that modules do not perform certain
      * development checks
      */
+    new CopyPlugin({
+      // Use copy plugin to copy *.wasm to output folder.
+      patterns: [
+        {
+          from: './src/models/tfjs/model.json',
+          to: 'model.json',
+        },
+        {
+          from: './src/models/tfjs/group1-shard1of6.bin',
+          to: 'group1-shard1of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard2of6.bin',
+          to: 'group1-shard2of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard3of6.bin',
+          to: 'group1-shard3of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard4of6.bin',
+          to: 'group1-shard4of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard5of6.bin',
+          to: 'group1-shard5of6.bin',
+        },
+        {
+          from: './src/models/tfjs/group1-shard6of6.bin',
+          to: 'group1-shard6of6.bin',
+        },
+      ],
+    }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
       DEBUG_PROD: false,
@@ -131,17 +178,17 @@ const configuration: webpack.Configuration = {
       isBrowser: false,
       isDevelopment: false,
     }),
-    new HtmlWebpackPlugin({
-      filename: 'splash.html',
-      template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true,
-      },
-      isBrowser: false,
-      isDevelopment: false,
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: 'splash.html',
+    //   template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
+    //   minify: {
+    //     collapseWhitespace: true,
+    //     removeAttributeQuotes: true,
+    //     removeComments: true,
+    //   },
+    //   isBrowser: false,
+    //   isDevelopment: false,
+    // }),
 
     new webpack.DefinePlugin({
       'process.type': '"renderer"',

@@ -179,7 +179,9 @@ const Detection = ({
         </div>
         <div>
           <button
-            onClick={() => navigate(`/${currClinic?.id}/records/`)}
+            onClick={() =>
+              navigate(`/${currClinic?.id}/records/`)
+            }
             className="font-bold text-xl px-4 py-2 "
           >
             Skip

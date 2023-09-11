@@ -5,8 +5,9 @@ import {
   uploadString,
 } from 'firebase/storage';
 import { v4 } from 'uuid';
+// @ts-ignore
 import { Timestamp } from 'firebase/firestore';
-import { sendFile, receiveFile } from './offlineImageUploads';
+// import { sendFile, receiveFile } from './offlineImageUploads';
 import { storage } from './firebase-config';
 
 const toBase64 = (file: File) =>
@@ -38,6 +39,7 @@ export const uploadFile = async (
       // sendFile( name, Buffer.from(imageArrBuffer));
       // // returns file url
       return {
+        name,
         offlineUrl,
         onlineUrl: '',
         createdOn: Timestamp.now(),
@@ -47,6 +49,7 @@ export const uploadFile = async (
     {
       const imageRef = ref(storage, `images/${name}`);
       const uploadedFile = {
+        name,
         onlineUrl: '',
         offlineUrl,
         createdOn: Timestamp.now(),
@@ -75,6 +78,7 @@ export const uploadFile = async (
       //   local: true,
       // };
       return {
+        name,
         onlineUrl: '',
         offlineUrl: imageUpload,
         createdOn: Timestamp.now(),
@@ -84,6 +88,7 @@ export const uploadFile = async (
     else {
       const imageRef = ref(storage, `images/${name}`);
       const uploadedFile = {
+        name,
         onlineUrl: '',
         offlineUrl: imageUpload,
         createdOn: Timestamp.now(),
