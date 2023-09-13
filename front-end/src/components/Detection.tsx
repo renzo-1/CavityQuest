@@ -143,7 +143,7 @@ const Detection = ({
     mainCanvas.width = 640;
     mainCanvas.height = 640;
 
-    tf.loadGraphModel(`model.json`, {
+    tf.loadGraphModel(`models/model.json`, {
       onProgress: (fractions) => {
         setLoading({ loading: true, progress: fractions });
       },
@@ -179,9 +179,7 @@ const Detection = ({
         </div>
         <div>
           <button
-            onClick={() =>
-              navigate(`/${currClinic?.id}/records/`)
-            }
+            onClick={() => navigate(`/${currClinic?.id}/records/`)}
             className="font-bold text-xl px-4 py-2 "
           >
             Skip

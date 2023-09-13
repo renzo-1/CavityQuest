@@ -10,14 +10,15 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
-import CopyPlugin from 'copy-webpack-plugin';
-import os from 'os';
+import CopyPlugin, { Pattern } from 'copy-webpack-plugin';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
+import paths from './webpack.paths';
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
 if (process.env.NODE_ENV === 'production') {
   checkNodeEnv('development');
 }
+const assets = ['models'];
 
 const port = process.env.PORT || 1212;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
@@ -181,52 +182,45 @@ const configuration: webpack.Configuration = {
       isDevelopment: process.env.NODE_ENV !== 'production',
       nodeModules: webpackPaths.appNodeModulesPath,
     }),
-    // new HtmlWebpackPlugin({
-    //   filename: path.join('splash.html'),
-    //   template: path.join(webpackPaths.srcRendererPath, 'splash.ejs'),
-    //   minify: {
-    //     collapseWhitespace: true,
-    //     removeAttributeQuotes: true,
-    //     removeComments: true,
-    //   },
-    //   isBrowser: false,
-    //   env: process.env.NODE_ENV,
-    //   isDevelopment: process.env.NODE_ENV !== 'production',
-    //   nodeModules: webpackPaths.appNodeModulesPath,
-    // }),
+
     new NodePolyfillPlugin(),
     new CopyPlugin({
       // Use copy plugin to copy *.wasm to output folder.
-      patterns: [
-        {
-          from: './src/models/tfjs/model.json',
-          to: 'model.json',
-        },
-        {
-          from: './src/models/tfjs/group1-shard1of6.bin',
-          to: 'group1-shard1of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard2of6.bin',
-          to: 'group1-shard2of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard3of6.bin',
-          to: 'group1-shard3of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard4of6.bin',
-          to: 'group1-shard4of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard5of6.bin',
-          to: 'group1-shard5of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard6of6.bin',
-          to: 'group1-shard6of6.bin',
-        },
-      ],
+      // patterns: assets.map((asset) => ({
+      //   from: path.resolve(paths.srcPath, asset),
+      //   to: path.resolve(__dirname, '.webpack/renderer', asset),
+      // })),
+
+      // {
+      // {
+      //   from: './src/models/tfjs/group1-shard1of6.bin',
+      //   to: 'group1-shard1of6.bin',
+      // },
+      // {
+      //   from: './src/models/tfjs/group1-shard2of6.bin',
+      //   to: 'group1-shard2of6.bin',
+      // },
+      // {
+      //   from: './src/models/tfjs/group1-shard3of6.bin',
+      //   to: 'group1-shard3of6.bin',
+      // },
+      // {
+      //   from: './src/models/tfjs/group1-shard4of6.bin',
+      //   to: 'group1-shard4of6.bin',
+      // },
+      // {
+      //   from: './src/models/tfjs/group1-shard5of6.bin',
+      //   to: 'group1-shard5of6.bin',
+      // },
+      // {
+      //   from: './src/models/tfjs/group1-shard6of6.bin',
+      //   to: 'group1-shard6of6.bin',
+      // },
+      patterns: [{ from: './src/models/tfjs/', to: 'models' }],
+      // {
+      //   from: './src/models/tfjs/model.json',
+      //   to: 'model.json',
+      // },
     }),
   ],
 

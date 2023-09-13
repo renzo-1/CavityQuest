@@ -15,6 +15,7 @@ import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
 import CopyPlugin from 'copy-webpack-plugin';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -120,38 +121,10 @@ const configuration: webpack.Configuration = {
      * NODE_ENV should be production so that modules do not perform certain
      * development checks
      */
+    new NodePolyfillPlugin(),
     new CopyPlugin({
       // Use copy plugin to copy *.wasm to output folder.
-      patterns: [
-        {
-          from: './src/models/tfjs/model.json',
-          to: 'model.json',
-        },
-        {
-          from: './src/models/tfjs/group1-shard1of6.bin',
-          to: 'group1-shard1of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard2of6.bin',
-          to: 'group1-shard2of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard3of6.bin',
-          to: 'group1-shard3of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard4of6.bin',
-          to: 'group1-shard4of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard5of6.bin',
-          to: 'group1-shard5of6.bin',
-        },
-        {
-          from: './src/models/tfjs/group1-shard6of6.bin',
-          to: 'group1-shard6of6.bin',
-        },
-      ],
+      patterns: [{ from: './src/models/tfjs/', to: 'models' }],
     }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',

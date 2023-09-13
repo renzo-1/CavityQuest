@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, ContextBridge } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  protocol,
+  session,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -23,7 +30,17 @@ class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'static',
+    privileges: {
+      standard: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+      secure: true,
+    },
+  },
+]);
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -61,6 +78,19 @@ const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
   }
+
+  session.defaultSession.protocol.registerFileProtocol(
+    'static',
+    (request, callback) => {
+      const fileUrl = request.url.replace('static://', '');
+      const filePath = path.join(
+        app.getAppPath(),
+        '.webpack/renderer',
+        fileUrl
+      );
+      callback(filePath);
+    }
+  );
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
