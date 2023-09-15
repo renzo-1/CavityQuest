@@ -5,6 +5,7 @@ interface Descs {
   minLength?: string;
   pattern?: string;
   required: string;
+  validate: string;
 }
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
   descs: Descs;
 }
 
-const FormFieldError = ({ errField, descs }: Props) => {
+const FormFieldError: any = ({ errField, descs }: Props) => {
   return (
     <>
       {errField && (

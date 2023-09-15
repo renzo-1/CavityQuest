@@ -1,6 +1,6 @@
 import React, { MouseEvent, useState, useEffect } from 'react';
-import { detection, records, closeBtn, list } from '../../assets';
-import { PatientForm } from 'components';
+import { detection, records, threeDots } from '../../assets';
+import { PatientForm, SignOut } from 'components';
 import { useNavigate } from 'react-router-dom';
 import { ClinicsMenu } from 'components';
 import { useAppContext } from 'features/AppContext';
@@ -15,7 +15,6 @@ const Menu = () => {
   const handleClick = (e: MouseEvent): void => {
     setShowPatientForm((prev) => !prev);
   };
-
   return (
     <>
       <div className="w-full h-1/2 absolute top-0 left-0 bg-[url('../../assets/bg2.jpg')] bg-fixed bg-center	 brightness-50 shadow-lg bg-cover bg-no-repeat z-20"></div>
@@ -31,18 +30,18 @@ const Menu = () => {
                 navigator.onLine ? 'bg-green-600' : 'bg-slate-600'
               }`}
             ></div>
-            <p className="text-sm text-white">
+            <p className="text-lg text-white">
               {navigator.onLine ? 'Online' : 'Offline'}
             </p>
           </div>
           <div className="space-x-4 flex justify-center items-center">
-            <p className="text-white font-bold">{currClinic?.name}</p>
             <button
-              className="z-[9999]"
               onClick={() => setShowClinicsMenu(true)}
+              className="text-white text-lg font-bold"
             >
-              <img src={list} alt="clinics menu" className="w-10 h-10"></img>
+              {currClinic?.name}
             </button>
+            <SignOut />
           </div>
         </div>
       )}

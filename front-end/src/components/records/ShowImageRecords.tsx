@@ -15,7 +15,6 @@ import {
 import formatDate from 'utils/formatDate';
 import { useAppContext } from 'features/AppContext';
 import { collection, getDoc } from 'firebase/firestore';
-import { readFile } from 'utils/offlineImageUploads';
 import { db } from 'utils/firebase-config';
 // array to set to array (function: get unique dates)
 const getUniqueDateRecords = (arr: ImageUpload[]) => {
@@ -36,15 +35,10 @@ interface Props {
 }
 
 const ShowImageRecords = ({ id }: Props) => {
-  const {
-    patientData,
-    setCurrPatient,
-    currPatient,
-    images,
-    setImages,
-    clinics,
-  } = useAppContext() as ContextType;
+  const { patientData, setCurrPatient, currPatient, clinics } =
+    useAppContext() as ContextType;
   const [dateStamps, setDateStamps] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageUpload[]>([]);
 
   // const dateStamps = useMemo(() => {
   //   console.log(patientData);
@@ -98,6 +92,7 @@ const ShowImageRecords = ({ id }: Props) => {
         if (docSnap.exists()) {
           const data: ImageUpload = docSnap.data() as ImageUpload;
           const obj: ImageUpload = {
+            name: data.name,
             createdOn: data.createdOn,
             onlineUrl: data.onlineUrl,
             offlineUrl: data.offlineUrl,

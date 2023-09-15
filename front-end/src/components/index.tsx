@@ -7,6 +7,9 @@ import PatientRowInfo from './records/PatientRowInfo';
 import Carousel from './Carousel';
 import ClinicForm from './clinic/ClinicForm';
 import ClinicsMenu from './clinic/ClinicsMenu';
+import AuthButtons from './authentication/AuthButtons';
+import { SignIn, SignUp, AuthHero, SignOut } from './authentication';
+import ProtectedRoute from './ProtectedRoute';
 export {
   BackButton,
   FormFieldError,
@@ -17,4 +20,9 @@ export {
   Carousel,
   ClinicForm,
   ClinicsMenu,
+  SignIn,
+  SignUp,
+  AuthButtons,
+  AuthHero,
+  ProtectedRoute, SignOut
 };

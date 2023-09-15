@@ -2,13 +2,14 @@ import React, { useState, ChangeEvent, useRef } from 'react';
 import { closeBtn, plusWhite } from '../../../assets';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
+import { AuthContextType, ContextType } from 'utils/Interfaces';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import BackButton from '../BackButton';
 import { collection, addDoc, FieldValue } from 'firebase/firestore';
 import { db } from 'utils/firebase-config';
+import { useAuthContext } from 'features/AuthContext';
 
 const ClinicForm = () => {
   const [show, setShow] = useState<boolean>(false);
@@ -17,13 +18,12 @@ const ClinicForm = () => {
     formState: { errors },
     handleSubmit,
     reset,
-    watch,
-    setValue,
   } = useForm<{ name: string }>();
 
   const { currClinic, setCurrClinic, clinics, dentists } =
     useAppContext() as ContextType;
   const clinicCollection = collection(db, 'clinics');
+  const { auth } = useAuthContext() as AuthContextType;
 
   const handleClinicChange = (e: ChangeEvent<HTMLSelectElement>) => {
     for (let clinic of clinics) {
@@ -38,16 +38,15 @@ const ClinicForm = () => {
     try {
       const internetStatus = navigator.onLine;
       let newClinicRef;
-      let newClinicID;
 
       if (internetStatus) {
         newClinicRef = await addDoc(clinicCollection, {
+          uid: auth?.uid,
           name: data.name,
           patients: [],
           dentists: [],
         });
-        // newClinicID = newClinicRef.id;
-        // setCurrClinic(newClinicRef.id);
+
       } else {
         newClinicRef = addDoc(clinicCollection, {
           name: data.name,

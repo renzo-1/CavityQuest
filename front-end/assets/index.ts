@@ -13,6 +13,8 @@ import plusWhite from './icons/plus-white.svg';
 import check from './icons/check.svg';
 import closeWhite from './icons/closeWhite.svg';
 import list from './icons/list.svg';
+import tooth3d from './3d-tooth.png';
+import threeDots from './icons/threeDots.svg';
 export {
   detection,
   records,
@@ -28,4 +30,6 @@ export {
   check,
   closeWhite,
   list,
+  tooth3d,
+  threeDots,
 };

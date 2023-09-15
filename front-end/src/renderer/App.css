@@ -127,6 +127,9 @@ html {
   text-shadow: rgba(0, 0, 0, 0.16) 0px 3px 3px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 @layer base {
+  .authShadow {
+    box-shadow: 20px 20px 60px #bebebe;
+  }
   form input,
   form select {
     @apply w-full h-12 rounded-lg p-3 bg-[#E7E7E7];

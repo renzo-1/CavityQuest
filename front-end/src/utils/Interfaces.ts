@@ -1,10 +1,7 @@
 import { Data } from 'electron';
 import { Url } from 'url';
 import React, { Dispatch, SetStateAction } from 'react';
-import {
-  DocumentReference,
-} from 'firebase/firestore'
-;
+import { DocumentReference } from 'firebase/firestore';
 enum GenderEnum {
   female = 'Female',
   male = 'Male',
@@ -33,7 +30,7 @@ interface PatientData {
   id: string | number;
   fullName: string;
   firstName: string;
-  middleName: string;
+  middleName?: string;
   lastName: string;
   clinic: number;
   dentist: string;
@@ -46,12 +43,17 @@ interface PatientData {
   treatments?: string[];
   createdOn: Timestamp;
 }
+// interface HistoryData {
+//   treatment: string;
+//   createdOn: Timestamp;
+//   dentist: string;
+// }
 interface FormattedPatientData {
   id: string;
   patientNumber: number;
   fullName: string;
   firstName: string;
-  middleName: string;
+  middleName?: string;
   lastName: string;
   clinic: string;
   dentist: string;
@@ -62,6 +64,7 @@ interface FormattedPatientData {
   imageUploads: DocumentReference[];
   note?: string;
   treatments?: string[];
+  // history?: string[];
   createdOn: Timestamp;
 }
 interface CreatePatientData extends Omit<PatientData, 'imageUploads'> {
@@ -90,6 +93,7 @@ interface DentistProps {
   name: string;
 }
 interface Clinic {
+  uid: string;
   id: string;
   name: string;
   patients: DocumentReference[];
@@ -110,7 +114,6 @@ interface PatientDataAction {
     currPatient?: number | string;
   };
 }
-
 interface ContextType {
   patientData: FormattedPatientData[];
   setPatientData: Dispatch<SetStateAction<FormattedPatientData[]>>;
@@ -129,8 +132,7 @@ interface ContextType {
   getPatients: (clinic: Clinic[]) => Promise<void>;
   // getDentists: () => void;
   deletePatientOnClinic: (newDataRef: DocumentReference) => void;
-  images: ImageUpload[];
-  setImages: Dispatch<SetStateAction<ImageUpload[]>>;
+
   addDentistOffline: (dentistName: string) => void;
   addImageOffline: (name: string) => void;
   addPatientOffline: (fName: string, lName: string, mName?: string) => void;
@@ -149,6 +151,14 @@ interface columns {
   label: string;
   sortable: boolean;
 }
+interface Auth {
+  uid: string;
+  email: string;
+}
+interface AuthContextType {
+  auth?: Auth;
+  setAuth: Dispatch<SetStateAction<Auth | undefined>>;
+}
 
 export {
   CreatePatientData,
@@ -163,4 +173,6 @@ export {
   tableData,
   columns,
   FormattedPatientData,
+  AuthContextType,
+  Auth,
 };

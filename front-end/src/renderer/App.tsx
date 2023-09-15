@@ -1,28 +1,52 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import './App.css';
 import 'tailwindcss/tailwind.css';
-import { Landing, Menu, Detection, Records, ShowPatientInfo } from 'pages';
-import AppProvider from 'features/AppContext';
+import {
+  Landing,
+  Menu,
+  Detection,
+  Records,
+  ShowPatientInfo,
+  Authentication,
+} from 'pages';
+import { AppProvider, AuthProvider } from 'features';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ProtectedRoute } from 'components';
+
 export default function App() {
   return (
     <>
       <ToastContainer limit={1} />
       <Landing />
       <Router>
-        <AppProvider>
-          <Routes>
-            {/* <Route path="/" element={<Menu />} />
-            <Route path="/detection/:id" element={<Detection />} />
-            <Route path="/records" element={<Records />} />
-            <Route path="/records/:id" element={<ShowPatientInfo />} /> */}
-            <Route path="/:clinic?" element={<Menu />} />
-            <Route path="/:clinic/detection/:id" element={<Detection />} />
-            <Route path="/:clinic/records" element={<Records />} />
-            <Route path="/:clinic/records/:id" element={<ShowPatientInfo />} />
-          </Routes>
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <Routes>
+              <Route path="/auth" element={<Authentication />} />
+
+              <Route
+                path="/:clinic?"
+                element={
+                  <ProtectedRoute>
+                    <Menu />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/:clinic/detection/:id" element={<Detection />} />
+              <Route path="/:clinic/records" element={<Records />} />
+              <Route
+                path="/:clinic/records/:id"
+                element={<ShowPatientInfo />}
+              />
+            </Routes>
+          </AppProvider>
+        </AuthProvider>
       </Router>
     </>
   );

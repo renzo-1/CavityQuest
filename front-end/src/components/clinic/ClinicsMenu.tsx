@@ -1,11 +1,13 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { collection, addDoc, FieldValue } from 'firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { check, closeBtn, closeWhite, plusWhite } from '../../../assets';
+import { AuthContextType, ContextType } from 'utils/Interfaces';
+import { useAuthContext } from 'features/AuthContext';
+
 const ClinicsMenu = ({
   setShowClinics,
 }: {
@@ -22,18 +24,20 @@ const ClinicsMenu = ({
     watch,
     setValue,
   } = useForm<{ name: string }>();
+  const clinicCollection = collection(db, 'clinics');
+  const { auth } = useAuthContext() as AuthContextType;
 
   const onSubmit = async (data: { name: string }) => {
     const toastId = toast.loading('Saving clinic...');
-    const clinicCollection = collection(db, 'clinics');
+
     console.log(data);
     try {
-      const internetStatus = navigator.onLine;
       let newClinicRef;
       let newClinicID;
 
-      if (internetStatus) {
+      if (navigator.onLine) {
         newClinicRef = await addDoc(clinicCollection, {
+          uid: auth?.uid,
           name: data.name,
           patients: [],
           dentists: [],
@@ -42,6 +46,7 @@ const ClinicsMenu = ({
         // setCurrClinic(newClinicRef.id);
       } else {
         newClinicRef = addDoc(clinicCollection, {
+          uid: auth?.uid,
           name: data.name,
           patients: [],
           dentists: [],

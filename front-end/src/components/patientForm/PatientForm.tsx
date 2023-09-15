@@ -28,7 +28,6 @@ import {
   updateDoc,
   arrayUnion,
   DocumentReference,
-  getDoc,
 } from '@firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { uploadFile } from 'utils/uploadFiles';
@@ -43,7 +42,6 @@ const PatientForm = ({
     clinics,
     currClinic,
     updateClinic,
-    getPatients,
     addPatientOffline,
   } = useAppContext() as ContextType;
   const [isAddingDentist, setIsAddingDentist] = useState<boolean>(false);
@@ -74,9 +72,8 @@ const PatientForm = ({
       const dentist = doc(collection(db, 'dentists'), data.dentist);
 
       const formData = {
-        // clinic: `/clinics/${currClinic}`,
         firstName: capitalize(data.firstName),
-        middleName: capitalize(data.middleName),
+        middleName: data.middleName ? capitalize(data.middleName) : '',
         lastName: capitalize(data.lastName),
         dateOfBirth,
         gender: data.gender,
@@ -215,6 +212,7 @@ const PatientForm = ({
               <p className="font-medium">Date of birth</p>
               <input
                 type="date"
+                max={new Date().toISOString().split('T')[0]}
                 placeholder="Choose your date of birth"
                 {...register('dateOfBirth', { required: true })}
                 aria-invalid={errors.dateOfBirth ? 'true' : 'false'}
