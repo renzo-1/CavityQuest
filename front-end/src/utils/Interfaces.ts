@@ -33,7 +33,7 @@ interface PatientData {
   middleName?: string;
   lastName: string;
   clinic: number;
-  dentist: string;
+  // dentist: string;
   dateOfBirth: string;
   address: string;
   contactNumber: string;
@@ -42,12 +42,13 @@ interface PatientData {
   note?: string;
   treatments?: string[];
   createdOn: Timestamp;
+  history?: HistoryData[];
 }
-// interface HistoryData {
-//   treatment: string;
-//   createdOn: Timestamp;
-//   dentist: string;
-// }
+interface HistoryData {
+  treatment: string;
+  createdOn: string;
+  dentist: string;
+}
 interface FormattedPatientData {
   id: string;
   patientNumber: number;
@@ -56,7 +57,7 @@ interface FormattedPatientData {
   middleName?: string;
   lastName: string;
   clinic: string;
-  dentist: string;
+  // dentist: string;
   dateOfBirth: string;
   address: string;
   contactNumber: string;
@@ -64,7 +65,7 @@ interface FormattedPatientData {
   imageUploads: DocumentReference[];
   note?: string;
   treatments?: string[];
-  // history?: string[];
+  history?: HistoryData[];
   createdOn: Timestamp;
 }
 interface CreatePatientData extends Omit<PatientData, 'imageUploads'> {
@@ -132,7 +133,6 @@ interface ContextType {
   getPatients: (clinic: Clinic[]) => Promise<void>;
   // getDentists: () => void;
   deletePatientOnClinic: (newDataRef: DocumentReference) => void;
-
   addDentistOffline: (dentistName: string) => void;
   addImageOffline: (name: string) => void;
   addPatientOffline: (fName: string, lName: string, mName?: string) => void;
@@ -175,4 +175,5 @@ export {
   FormattedPatientData,
   AuthContextType,
   Auth,
+  HistoryData,
 };

@@ -151,7 +151,7 @@ const EditRecord = () => {
         className="bg-white shadow-lg rounded-lg px-12 py-6 w-1/2 space-y-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="mb-2 justify-between flex">
+        {/* <div className="mb-2 justify-between flex">
           <div>
             <h3 className="text-sm">Dentist</h3>
             <p className="font-bold text-xl rounded-lg">
@@ -169,7 +169,7 @@ const EditRecord = () => {
                 )
             )}
           </div>
-        </div>
+        </div> */}
 
         <div className="flex justify-between mb-2">
           <h1 className="text-sm">Treatment</h1>

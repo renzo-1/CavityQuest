@@ -1,13 +1,14 @@
 import React, { MouseEvent, useState, useEffect } from 'react';
-import { detection, records, threeDots } from '../../assets';
-import { PatientForm, SignOut } from 'components';
+import { detection, records } from '../../assets';
+import { PatientForm, MoreMenu, ClinicsMenu, DentistForm } from 'components';
 import { useNavigate } from 'react-router-dom';
-import { ClinicsMenu } from 'components';
 import { useAppContext } from 'features/AppContext';
 import { ContextType } from 'utils/Interfaces';
 
 const Menu = () => {
   const [showPatientForm, setShowPatientForm] = useState<boolean>(false);
+  const [isShowDentistForm, setIsShowDentistForm] = useState<boolean>(false);
+
   const { currClinic, setShowClinicsMenu, showClinicsMenu } =
     useAppContext() as ContextType;
   const navigate = useNavigate();
@@ -41,12 +42,15 @@ const Menu = () => {
             >
               {currClinic?.name}
             </button>
-            <SignOut />
+            <MoreMenu setIsShowDentistForm={setIsShowDentistForm} />
           </div>
         </div>
       )}
+      {isShowDentistForm && (
+        <DentistForm setIsShowDentistForm={setIsShowDentistForm} />
+      )}
       {/* BACKDROP */}
-      {(showPatientForm || showClinicsMenu) && (
+      {(showPatientForm || showClinicsMenu || isShowDentistForm) && (
         <div className="bg-black fixed min-h-screen w-full opacity-50 h-screen z-20"></div>
       )}
       {/* MENU BUTTONS */}

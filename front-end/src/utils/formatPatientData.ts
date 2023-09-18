@@ -1,19 +1,15 @@
 import { FormattedPatientData, PatientData } from './Interfaces';
 export const formatPatientData = (
   data: PatientData,
-  dentist: string,
+  // dentist: string,
   id: string,
   patientNumber: number,
   currClinic: string
 ) => {
-  const fullName =
-    data.lastName +
-    ', ' +
-    data.firstName +
-    ' ' +
-    data.middleName.charAt(0) +
-    '.';
-
+  const mName = data?.middleName ? data?.middleName!.charAt(0) + '.' : '';
+  const fullName = data.lastName + ', ' + data.firstName + ' ' + mName;
+  const treatments = data.history?.map((h) => ` ${h.treatment}`);
+  console.log('treatments', treatments);
   const formattedData = {
     id,
     patientNumber,
@@ -22,14 +18,15 @@ export const formatPatientData = (
     middleName: data.middleName,
     lastName: data.lastName,
     clinic: currClinic,
-    dentist,
+    // dentist,
+    history: data.history || [],
     dateOfBirth: data.dateOfBirth,
     address: data.address,
     contactNumber: data.contactNumber,
     gender: data.gender,
     imageUploads: data.imageUploads,
     note: data.note,
-    treatments: data.treatments,
+    treatments,
     createdOn: data.createdOn,
   };
   return formattedData;

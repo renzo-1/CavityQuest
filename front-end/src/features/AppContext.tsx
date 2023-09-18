@@ -74,7 +74,6 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
                   patientsArr.push(
                     formatPatientData(
                       data,
-                      dentistData.name!,
                       docSnap.id,
                       index + 1,
                       currClinic?.id

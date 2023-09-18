@@ -9,7 +9,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { closeBtn, check, plus } from '../../../assets';
 import FormFieldError from './FormFieldError';
-import DentistForm from './DentistForm';
+import DentistForm from '../dentist/DentistForm';
 import {
   ContextType,
   PatientData,
@@ -69,7 +69,7 @@ const PatientForm = ({
       );
       console.log('imgs', imgs);
       const dateOfBirth = new Date(data.dateOfBirth).toISOString().slice(0, 10);
-      const dentist = doc(collection(db, 'dentists'), data.dentist);
+      // const dentist = doc(collection(db, 'dentists'), data.dentist);
 
       const formData = {
         firstName: capitalize(data.firstName),
@@ -78,9 +78,10 @@ const PatientForm = ({
         dateOfBirth,
         gender: data.gender,
         address: data.address,
-        dentist,
+        // dentist,
         contactNumber: data.contactNumber,
         // imageUploads: internetStatus ? imgs : [], // prod
+        history: [],
         imageUploads: [],
         createdOn: Timestamp.now(),
       };
@@ -131,25 +132,25 @@ const PatientForm = ({
     }
   };
 
-  const handleInputChanges = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setValue('dentist', value);
-  };
+  // const handleInputChanges = (event: ChangeEvent<HTMLSelectElement>) => {
+  //   const value = event.target.value;
+  //   setValue('dentist', value);
+  // };
 
   const handleRemoveFile = (index: number) => {
     const newFilesList = Array.from(uploadedFiles).splice(1, index);
     setValue('imageUploads', newFilesList);
   };
 
-  useEffect(() => {
-    if (
-      availableDentists &&
-      availableDentists[0] &&
-      availableDentists.length > 0
-    ) {
-      setValue('dentist', availableDentists[0].id!);
-    }
-  }, [availableDentists, clinics]);
+  // useEffect(() => {
+  //   if (
+  //     availableDentists &&
+  //     availableDentists[0] &&
+  //     availableDentists.length > 0
+  //   ) {
+  //     setValue('dentist', availableDentists[0].id!);
+  //   }
+  // }, [availableDentists, clinics]);
 
   return (
     <>
@@ -276,7 +277,7 @@ const PatientForm = ({
             </label>
           </div>
           <div className="h-full flex justify-center items-center flex-col space-y-10 black-select">
-            <label className="w-full">
+            {/* <label className="w-full">
               <p className="font-medium">Dentist</p>
               <div className="flex space-x-4">
                 <select
@@ -316,7 +317,7 @@ const PatientForm = ({
               {isAddingDentist && (
                 <DentistForm setIsAddingDentist={setIsAddingDentist} />
               )}
-            </label>
+            </label> */}
 
             <div className="file-input">
               <label htmlFor="imageUploads">

@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import FormFieldError from 'components/patientForm/FormFieldError';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from 'features/AuthContext';
 import { AuthContextType } from 'utils/Interfaces';
 import { toast } from 'react-toastify';
@@ -16,24 +16,23 @@ interface FormType {
   password: string;
 }
 
-const SignIn = () => {
+const SignIn = ({
+  setIsForgotPassword,
+}: {
+  setIsForgotPassword: Dispatch<SetStateAction<boolean>>;
+}) => {
   const { auth, setAuth } = useAuthContext() as AuthContextType;
   const {
     register,
     formState: { errors },
     handleSubmit,
-    reset,
-    watch,
-    setValue,
-    getValues,
   } = useForm<FormType>();
 
   const navigate = useNavigate();
   const onSubmit = async (data: FormType) => {
     const auth = getAuth();
-    console.log('data.email', data.email);
-    console.log('data.password', data.password);
     const toastId = toast.loading('Signing you in...');
+
     try {
       await setPersistence(auth, browserLocalPersistence);
       const userCredentials = await signInWithEmailAndPassword(
@@ -53,9 +52,9 @@ const SignIn = () => {
         isLoading: false,
       });
     } catch (error: any) {
-      console.log(error);
+      const errorCode = error.code.split('/')[1].split('-').join(' ');
       toast.update(toastId, {
-        render: error.message,
+        render: errorCode,
         type: 'error',
         autoClose: 2000,
         isLoading: false,
@@ -105,7 +104,12 @@ const SignIn = () => {
           }}
         />
       </label>
-
+      <span
+        className="underline cursor-pointer"
+        onClick={() => setIsForgotPassword(true)}
+      >
+        Forgot password?
+      </span>
       <button
         type="submit"
         className="bg-primary text-xl font-bold rounded-lg px-5 py-2 text-white mt-2 transition-all duration-500 ease-out"

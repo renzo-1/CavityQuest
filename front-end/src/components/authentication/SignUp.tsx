@@ -62,10 +62,10 @@ const SignUp = () => {
         isLoading: false,
       });
     } catch (error: any) {
-      console.log(error);
+      const errorCode = error.code.split('/')[1].split('-').join(' ');
       setIsLoading(false);
       toast.update(toastId, {
-        render: error.message,
+        render: errorCode,
         type: 'error',
         autoClose: 2000,
         isLoading: false,

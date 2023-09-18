@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, signOut } from 'firebase/auth';
-import { threeDots } from '../../../assets';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const SignOut = () => {
   const navigate = useNavigate();
-  const [isShowSignOut, SetIsShowSignOut] = useState<boolean>(false);
 
   const handleSignOut = () => {
     const auth = getAuth();
@@ -32,22 +30,14 @@ const SignOut = () => {
       });
   };
   return (
-    <div className="relative flex justify-center items-center">
+    <>
       <button
-        className="z-[9999]"
-        onClick={() => SetIsShowSignOut((prev) => !prev)}
+        onClick={handleSignOut}
+        className="bg-blackpy-1 px-2  rounded-md text-white font-bold text-md flex-nowrap whitespace-nowrap"
       >
-        <img src={threeDots} alt="clinics menu" className="w-8 h-8"></img>
+        Sign out
       </button>
-      {isShowSignOut && (
-        <button
-          onClick={handleSignOut}
-          className="bg-black absolute py-1 px-2 mt-14 rounded-md text-white font-bold text-md flex-nowrap whitespace-nowrap"
-        >
-          Sign out
-        </button>
-      )}
-    </div>
+    </>
   );
 };
 

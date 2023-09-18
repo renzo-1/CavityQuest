@@ -22,6 +22,7 @@ import { ProtectedRoute } from 'components';
 export default function App() {
   return (
     <>
+      <Landing />
       <ToastContainer limit={1} />
       <Landing />
       <Router>

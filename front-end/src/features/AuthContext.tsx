@@ -19,6 +19,9 @@ const AuthProvider: React.FC<AppProps> = ({ children }) => {
 
   useEffect(() => {
     onAuthStateChanged(getAuth(), (user) => {
+      if (!user && !navigator.onLine) {
+        navigate('/auth');
+      }
       if (user) {
         setAuth({
           uid: user.uid,
@@ -26,8 +29,7 @@ const AuthProvider: React.FC<AppProps> = ({ children }) => {
         });
         console.log(user);
         navigate('/');
-      }
-      if (!user || !navigator.onLine) {
+      } else {
         navigate('/auth');
       }
     });

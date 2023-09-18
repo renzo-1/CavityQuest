@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BackButton, PatientInfoField } from 'components';
+import { BackButton, PatientInfoField, History } from 'components';
 import { ContextType } from 'utils/Interfaces';
 import ShowImageRecords from 'components/records/ShowImageRecords';
 import DeleteRecord from 'components/records/DeleteRecord';
 import EditRecord from 'components/records/EditRecord';
 import { useAppContext } from 'features/AppContext';
 import formatDate from 'utils/formatDate';
-
 const ShowPatientInfo = () => {
   const navigate = useNavigate();
   const { id: idParam } = useParams();
-  const { currClinic, currPatient } =
-    useAppContext() as ContextType;
+  const { currClinic, currPatient } = useAppContext() as ContextType;
   const [isDeleting, setIsDeleting] = useState<Boolean>(false);
 
   const handleDeletionState = () => {
@@ -84,7 +82,7 @@ const ShowPatientInfo = () => {
                 </div>
               </div>
             </div>
-            <EditRecord />
+            <History />
           </div>
         )}
         <ShowImageRecords id={idParam} />
