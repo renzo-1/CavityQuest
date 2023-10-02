@@ -43,6 +43,7 @@ const Authentication = () => {
               onClick={() => {
                 window.location.reload();
               }}
+              className="underline font-bold"
             >
               Reload
             </button>

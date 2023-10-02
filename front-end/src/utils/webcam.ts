@@ -23,7 +23,7 @@ export class WebcamOps {
           .getUserMedia({
             audio: false,
             video: {
-              facingMode: 'environment',
+              facingMode: 'user',
             },
           })
           .then((stream) => {

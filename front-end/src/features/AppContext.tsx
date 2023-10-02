@@ -54,42 +54,34 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
 
   // GET PATIENTS OF THE CLINIC
   const getPatients = async (clinics: Clinic[]) => {
+    let patientsArr: FormattedPatientData[] = [];
     try {
-      let patientsArr: FormattedPatientData[] = [];
       if (currClinic) {
         const clinic: Clinic = clinics.filter(
           (clinic) => clinic.id == currClinic.id
         )[0];
 
+        // console.log(clinic.patients);
         await Promise.all(
           clinic.patients.map(
             async (patientRef: DocumentReference, index: number) => {
               const docSnap = await getDoc(patientRef);
-
               if (docSnap.exists()) {
+                // console.log(index, docSnap.data());
                 const data: any = docSnap.data();
-                const dentist = await getDoc(data.dentist);
-                const dentistData = dentist.data() as DentistProps;
-                if (dentist.exists()) {
-                  patientsArr.push(
-                    formatPatientData(
-                      data,
-                      docSnap.id,
-                      index + 1,
-                      currClinic?.id
-                    )
-                  );
-                }
+
+                patientsArr.push(
+                  formatPatientData(data, docSnap.id, index + 1, currClinic?.id)
+                );
               }
             }
           )
         );
       }
-      console.log('patientsArr', patientsArr);
-      setPatientData(patientsArr);
     } catch (e) {
       console.log(e);
     }
+    setPatientData(patientsArr);
   };
 
   const getDentists = async (clinics: Clinic[]) => {
@@ -111,19 +103,14 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
           })
         );
       }
-      console.log('dentistarr,', dentistsArr);
-      setDentists([...dentistsArr]);
+      // console.log('dentistarr,', dentistsArr);
+      setDentists(dentistsArr);
     } catch (e) {
       console.log(e);
     }
   };
 
   const getClinics = () => {
-    // const q = query(
-    //   clinicsCollection,
-    //   where(documentId(), '==', currClinic?.name)
-    // );
-    // const q = query(clinicsCollection, where("name", '==', currClinic?.name));
     const q = query(clinicsCollection, where('uid', '==', auth?.uid));
     onSnapshot(q, { includeMetadataChanges: true }, (querySnapshot) => {
       const clinicSnap: Clinic[] = querySnapshot.docs.map((doc) => ({
@@ -137,14 +124,13 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
       getPatients(clinicSnap);
       getDentists(clinicSnap);
     });
-    // cleanSnapShot();
   };
 
   useEffect(() => {
     if (auth) {
       getClinics();
     }
-  }, [currClinic, auth, auth?.uid]);
+  }, [currClinic?.id, auth, auth?.uid]);
 
   // ONLINE: Clinic updates for patients and dentists
   const updateClinic = async (newDataRef: DocumentReference, field: string) => {
@@ -162,10 +148,10 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
     if (!navigator.onLine) {
       const q = query(patientsCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-        snapshot.docChanges().forEach(async (change) => {
-          const { firstName, middleName, lastName } = change.doc.data();
+        for (let docChange of snapshot.docChanges()) {
+          const { firstName, middleName, lastName } = docChange.doc.data();
           if (
-            change.type === 'added' &&
+            docChange.type === 'added' &&
             currClinic &&
             firstName == fName &&
             middleName == mName &&
@@ -173,12 +159,11 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
           ) {
             const clinicRef = doc(clinicsCollection, currClinic?.id);
             updateDoc(clinicRef, {
-              patients: arrayUnion(change.doc.ref),
+              patients: arrayUnion(docChange.doc.ref),
             });
-            // saveImage(change.doc.id);
-            // getClinics();
+            break;
           }
-        });
+        }
       });
     }
   };
@@ -188,7 +173,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
       const q = query(dentistsCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         snapshot.docChanges().forEach(async (change, index) => {
-          console.log(change.doc.data().name == dentistName);
+          // console.log(change.doc.data().name == dentistName);
           if (
             change.type === 'added' &&
             currClinic &&

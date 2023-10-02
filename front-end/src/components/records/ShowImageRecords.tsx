@@ -96,6 +96,8 @@ const ShowImageRecords = ({ id }: Props) => {
             createdOn: data.createdOn,
             onlineUrl: data.onlineUrl,
             offlineUrl: data.offlineUrl,
+            toothLocation: data.toothLocation,
+            toothName: data.toothName,
           };
           imagesArr.push(obj);
         } else {
@@ -140,24 +142,31 @@ const ShowImageRecords = ({ id }: Props) => {
                   </h1>
                   <hr className="inline-block w-full border-0 border-t border-black"></hr>
                 </div>
-                <div className="grid grid-cols-3 gap-8">
+                <div className="grid grid-cols-4 gap-8">
                   {images.map((img, index) => {
                     if (
                       formatDate(new Date(img.createdOn.seconds * 1000)) ===
                       date
                     )
                       return (
-                        <img
-                          loading="lazy"
-                          key={index}
-                          className="rounded-lg z-20"
-                          src={
-                            img.onlineUrl == '' || !navigator.onLine
-                              ? img.offlineUrl
-                              : img.onlineUrl
-                          }
-                          alt="detection sample"
-                        ></img>
+                        <div>
+                          <img
+                            loading="lazy"
+                            key={index}
+                            className="rounded-lg z-20"
+                            src={
+                              img.onlineUrl == '' || !navigator.onLine
+                                ? img.offlineUrl
+                                : img.onlineUrl
+                            }
+                            alt="detection sample"
+                          ></img>
+                          {img.toothName && img.toothLocation && (
+                            <h2 className="font-bold text-xl">
+                              {img.toothName + '-' + img.toothLocation}
+                            </h2>
+                          )}
+                        </div>
                       );
                   })}
                 </div>

@@ -18,7 +18,7 @@ import { non_max_suppression } from '../utils/nonMaxSuppression';
 import { BackButton } from 'components';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
+import { ContextType, Capture } from 'utils/Interfaces';
 
 function shortenedCol(arrayofarray: any, indexlist: any) {
   return arrayofarray.map(function (array: number[]) {
@@ -38,8 +38,8 @@ const Detection = ({
 }: {
   handleSubmit: () => void;
   videoRef: RefObject<HTMLVideoElement>;
-  captures: string[];
-  setCaptures: Dispatch<SetStateAction<string[]>>;
+  captures: Capture[];
+  setCaptures: Dispatch<SetStateAction<Capture[]>>;
   setIsGalleryOpen: Dispatch<SetStateAction<boolean>>;
   webcamOps: WebcamOps;
 }) => {
@@ -51,18 +51,18 @@ const Detection = ({
   const [screenshotUrl, setScreenshotUrl] = useState<string>();
   const model_dim: [number, number] = [640, 640];
   const { currPatient, currClinic } = useAppContext() as ContextType;
+  const liveDetection = useRef<boolean>(true);
+
   const w = 640;
   const h = 640;
 
   // configs
   const modelName = 'Cavity Detection';
   const threshold = 0.3;
-  /**
-   * Function to detect every frame loaded from webcam in video tag.
-   * @param {tf.GraphModel} model loaded YOLOv7 tensorflow.js model
-   */
 
   const detectFrame = async (model: tf.GraphModel) => {
+    if (!liveDetection.current) return;
+
     try {
       tf.engine().startScope();
       const input = tf.tidy(() => {
@@ -75,6 +75,7 @@ const Detection = ({
           return img;
         }
       });
+
       if (input) {
         await model.executeAsync(input).then((res: any) => {
           res = res.arraySync()[0];
@@ -95,10 +96,10 @@ const Detection = ({
         });
       }
       requestAnimationFrame(() => detectFrame(model)); // get another frame
-      tf.engine().endScope();
     } catch (e) {
       console.log('Detection Error', e);
     }
+    tf.engine().endScope();
   };
 
   const capture = () => {
@@ -116,8 +117,8 @@ const Detection = ({
 
     // create a copy of the canvas
     const boxCanvas = document.createElement('canvas');
-    boxCanvas.height = 640;
-    boxCanvas.width = 640;
+    boxCanvas.height = h;
+    boxCanvas.width = w;
 
     const boxCtx = boxCanvas.getContext('2d') as CanvasRenderingContext2D;
 
@@ -132,16 +133,17 @@ const Detection = ({
 
     setScreenshotUrl(mainCanvas.toDataURL('image/jpeg', 1));
 
-    setCaptures((prev) => [imageUrl, ...prev]);
+    setCaptures((prev) => [{ url: imageUrl, location: '', name: '' }, ...prev]);
 
     boxCtx.clearRect(0, 0, w, h);
     mainCtx.clearRect(0, 0, w, h);
   };
 
   useEffect(() => {
+    if (!liveDetection.current) return;
     const mainCanvas = canvasRef.current!;
-    mainCanvas.width = 640;
-    mainCanvas.height = 640;
+    mainCanvas.width = w;
+    mainCanvas.height = h;
 
     tf.loadGraphModel(`models/model.json`, {
       onProgress: (fractions) => {
@@ -151,7 +153,7 @@ const Detection = ({
       .then(async (yolov7) => {
         // Warmup the model before using real data.
 
-        if (yolov7.inputs[0].shape) {
+        if (yolov7.inputs[0].shape && videoRef) {
           const dummyInput = tf.ones(yolov7.inputs[0].shape);
           const warmupResult = await yolov7.execute(dummyInput);
           tf.dispose(warmupResult);
@@ -162,15 +164,21 @@ const Detection = ({
       })
       .catch((e) => {});
   }, []);
-  console.warn = () => {};
 
-  window.addEventListener('keydown', (event) => {
-    if (event.code == 'Space') capture();
-  });
+  console.warn = () => {};
+  useEffect(() => {
+    window.addEventListener('keydown', (event) => {
+      if (event.code == 'Space') capture();
+    });
+  }, []);
+
   const handleCloseCam = () => {
+    console.log('closed');
     webcamOps.close(videoRef);
+    liveDetection.current = false;
     setCaptures([]);
   };
+
   return (
     <>
       <div className="flex z-30 w-full justify-between">
@@ -204,24 +212,22 @@ const Detection = ({
           <p> </p>
         )}
         <div className={`relative flex justify-center bg-gray-500`}>
-          <div className={`min-h-fit min-w-fit`}>
-            {isCapturing && (
-              <div className="w-full h-full bg-white opacity-80 absolute top-0 left-0 "></div>
-            )}
-            <video
-              className={`max-h-[${h}px]  max-w-[${w}px]`}
-              autoPlay
-              playsInline
-              muted
-              ref={videoRef}
-              id="frame"
-            />
-            <canvas
-              className="absolute top-0 left-0 w-full h-full"
-              ref={canvasRef}
-            />
-            <canvas className="absolute top-0 left-0" ref={boxRef} />
-          </div>
+          {isCapturing && (
+            <div className="w-full h-full bg-white opacity-80 absolute top-0 left-0 "></div>
+          )}
+          <video
+            className={`max-h-[${h}px]  max-w-[${w}px]`}
+            autoPlay
+            playsInline
+            muted
+            ref={videoRef}
+            id="frame"
+          />
+          <canvas
+            className="absolute top-0 left-0 w-full h-full mainCanvas"
+            ref={canvasRef}
+          />
+          <canvas className="absolute top-0 left-0 boxCanvas" ref={boxRef} />
         </div>
 
         <div className="w-full relative  flex justify-center space-x-10">
@@ -238,7 +244,7 @@ const Detection = ({
           >
             {captures[0] && (
               <img
-                src={captures[0]}
+                src={captures[0].url}
                 className="object-cover  cursor-pointer"
               ></img>
             )}

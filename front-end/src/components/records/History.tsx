@@ -10,6 +10,7 @@ import { updateDoc, getDoc, doc, arrayUnion } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { db } from 'utils/firebase-config';
 import { pencilSqaure } from '../../../assets';
+import { toothNames, toothLocations } from 'data/teeth';
 const History = () => {
   const { currPatient, dentists, setPatientData, setCurrPatient } =
     useAppContext() as ContextType;
@@ -23,18 +24,24 @@ const History = () => {
     setValue,
   } = useForm<HistoryData>({
     defaultValues: {
-      dentist: dentists![0].name,
+      dentist: dentists![0]?.name,
       treatment: treatments[0],
+      toothName: toothNames[0],
+      toothLocation: toothLocations[0],
       createdOn: formatDate(new Date(Timestamp.now().seconds * 1000)),
     },
   });
 
   const handleInputChanges = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    console.log(event.target.name);
-    event.target.name == 'dentist'
-      ? setValue('dentist', value)
-      : setValue('treatment', value);
+    const { value, name } = event.target;
+    const newName = name as
+      | 'treatment'
+      | 'createdOn'
+      | 'dentist'
+      | 'toothName'
+      | 'toothLocation';
+
+    setValue(newName, value);
   };
 
   const onSubmit = async (newHistory: HistoryData) => {
@@ -97,13 +104,16 @@ const History = () => {
           {isAdding ? (
             <>
               <button
-                className="font-bold text-gray-600"
+                className=" text-gray-600"
                 onClick={() => setIsAdding(false)}
               >
                 Cancel
               </button>
-              <button className="font-bold " onClick={handleSubmit(onSubmit)}>
-                Done
+              <button
+                className="font-bold text-primary"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Save
               </button>
             </>
           ) : (
@@ -113,17 +123,21 @@ const History = () => {
           )}
         </div>
       </div>
-      <ul className="grid grid-cols-3 justify-between mt-0">
+      <ul className="grid grid-cols-5 justify-between mt-0">
         <li className="font-medium">Date</li>
         <li className="font-medium">Treatment</li>
+        <li className="font-medium">Tooth Name</li>
+        <li className="font-medium">Tooth Location</li>
         <li className="font-medium">Dentist</li>
       </ul>
       {currPatient && currPatient?.history ? (
         currPatient?.history.map((history, index) => {
           return (
-            <ul className="grid grid-cols-3 justify-between  mt-0" key={index}>
+            <ul className="grid grid-cols-5 justify-between  mt-0" key={index}>
               <li className="w-full">{history.createdOn}</li>
               <li className="w-full">{history.treatment}</li>
+              <li className="w-full">{history.toothName}</li>
+              <li className="w-full">{history.toothLocation}</li>
               <li className="w-full">{history.dentist}</li>
             </ul>
           );
@@ -155,6 +169,28 @@ const History = () => {
               <option value={treatment}>{treatment}</option>
             ))}
           </select>
+          <select
+            name="toothName"
+            className="border border-gray-400"
+            {...(register('toothName'),
+            { required: true, onChange: handleInputChanges })}
+            aria-invalid={errors.toothName ? 'true' : 'false'}
+          >
+            {toothNames.map((toothName) => (
+              <option value={toothName}>{toothName}</option>
+            ))}
+          </select>
+          <select
+            name="toothLocation"
+            className="border border-gray-400"
+            {...(register('toothLocation'),
+            { required: true, onChange: handleInputChanges })}
+            aria-invalid={errors.toothLocation ? 'true' : 'false'}
+          >
+            {toothLocations.map((treatment) => (
+              <option value={treatment}>{treatment}</option>
+            ))}
+          </select>
 
           <select
             className="border border-gray-400"
@@ -166,7 +202,7 @@ const History = () => {
             {dentists &&
               dentists.length > 0 &&
               dentists.map((dentist) => (
-                <option key={dentist.id} value={dentist.id}>
+                <option key={dentist.id} value={dentist.name}>
                   {dentist.name}
                 </option>
               ))}

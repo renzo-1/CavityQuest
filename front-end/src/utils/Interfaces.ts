@@ -20,6 +20,8 @@ interface ImageUpload {
   onlineUrl: string;
   offlineUrl: string;
   name: string;
+  toothLocation?: string;
+  toothName?: string;
 }
 type Timestamp = {
   nanoseconds: number;
@@ -48,7 +50,15 @@ interface HistoryData {
   treatment: string;
   createdOn: string;
   dentist: string;
+  toothName: string;
+  toothLocation: string;
 }
+interface Capture {
+  name: string;
+  location: string;
+  url: string;
+}
+
 interface FormattedPatientData {
   id: string;
   patientNumber: number;
@@ -176,4 +186,5 @@ export {
   AuthContextType,
   Auth,
   HistoryData,
+  Capture,
 };

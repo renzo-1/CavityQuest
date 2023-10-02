@@ -20,7 +20,7 @@ export const renderBoxes = (
   const ctx = canvasRef.current!.getContext('2d')!;
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clean canvas
   // font configs
-  const font = '18px sans-serif';
+  const font = '20px sans-serif';
   ctx.font = font;
   ctx.textBaseline = 'top';
 
@@ -30,6 +30,7 @@ export const renderBoxes = (
       const score = (scores_data[i] * 100).toFixed(1);
 
       let [x1, y1, x2, y2] = xywh2xyxy(boxes_data[i]);
+      if (x1 < 0 || y1 < 0) return;
 
       const width = x2 - x1;
       const height = y2 - y1;

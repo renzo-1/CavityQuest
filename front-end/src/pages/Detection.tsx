@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { WebcamOps } from '../utils/webcam';
 import { Carousel, Detection as Detect } from 'components';
 import { useAppContext } from 'features/AppContext';
-import { ContextType, ImageUpload } from 'utils/Interfaces';
+import { ContextType, Capture } from 'utils/Interfaces';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -18,13 +18,14 @@ import {
 } from '@firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { uploadFile } from 'utils/uploadFiles';
+
 const Detection = () => {
   const { id } = useParams();
   const { currClinic, getPatients, getClinics, addImageOffline } =
     useAppContext() as ContextType;
   const videoRef = useRef<HTMLVideoElement>(null);
   const webcamOps = new WebcamOps();
-  const [captures, setCaptures] = useState<string[]>([]);
+  const [captures, setCaptures] = useState<Capture[]>([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -39,7 +40,12 @@ const Detection = () => {
       const internetStatus = navigator.onLine;
       const imgs = await Promise.all(
         captures.map(async (file, index) => {
-          const result = await uploadFile(file, `detection${index}`);
+          const result = await uploadFile(
+            file.url,
+            file.location,
+            file.name,
+            `detection${index}`
+          );
           return result;
         })
       );

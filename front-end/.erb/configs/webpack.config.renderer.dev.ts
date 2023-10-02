@@ -216,6 +216,7 @@ const configuration: webpack.Configuration = {
       //   from: './src/models/tfjs/group1-shard6of6.bin',
       //   to: 'group1-shard6of6.bin',
       // },
+      // patterns: [{ from: './src/models/studentmodel/', to: 'models' }],
       patterns: [{ from: './src/models/tfjs/', to: 'models' }],
       // {
       //   from: './src/models/tfjs/model.json',

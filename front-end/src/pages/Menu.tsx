@@ -73,7 +73,7 @@ const Menu = () => {
         </button>
       </div>
       <div className="h-1/2 absolute bottom-0 left-0 w-screen overflow-hidden flex justify-center items-center flex-nowrap">
-        <h1 className="md:text-[8rem] xl:text-[10rem]  2xl:text-[16rem]  text-myGray font-extrabold drop-shadow-banner whitespace-nowrap	">
+        <h1 className="md:text-[8rem] xl:text-[10rem] 2xl:text-[14rem]  text-myGray font-extrabold drop-shadow-banner whitespace-nowrap	">
           Cavity Quest
         </h1>
       </div>

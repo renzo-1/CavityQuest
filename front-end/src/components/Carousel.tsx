@@ -5,19 +5,36 @@ import React, {
   SetStateAction,
   useRef,
   useState,
+  ChangeEvent,
 } from 'react';
 import { arrow, closeBtn, trash } from '../../assets';
-import { image } from '@tensorflow/tfjs';
+import { Capture } from 'utils/Interfaces';
+import { toothNames, toothLocations } from 'data/teeth';
+import { useForm } from 'react-hook-form';
 
 const Carousel = ({
   images,
   setImages,
   setIsGalleryOpen,
 }: {
-  images: string[];
-  setImages: Dispatch<SetStateAction<string[]>>;
+  images: Capture[];
+  setImages: Dispatch<SetStateAction<Capture[]>>;
   setIsGalleryOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+  } = useForm<Capture>({
+    defaultValues: {
+      name: toothNames[0],
+      location: toothLocations[0],
+    },
+  });
+
   const [rightPos, setRightPos] = useState<number>(0);
   const [currIdx, setCurrIdx] = useState<number>(0);
   const w = 640;
@@ -57,7 +74,23 @@ const Carousel = ({
       return newArr;
     });
   };
+  const handleInputChanges = (
+    event: ChangeEvent<HTMLSelectElement>,
+    image: Capture,
+    index: number
+  ) => {
+    const { value, name } = event.target;
+    const newName = name as 'url' | 'location' | 'name';
+    setImages((prev) => {
+      const newArray = [...prev];
+      const indexToEdit = newArray.findIndex((img) => img.url === image.url);
+      newArray[indexToEdit] = { ...newArray[indexToEdit], [newName]: value };
+      console.log('newarray', newArray);
+      return newArray;
+    });
 
+    setValue(newName, value);
+  };
   return (
     <div className="absolute top-0 left-0 h-screen w-full border flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-[640px] h-[640px] border border-red-500 flex relative overflow-hidden">
@@ -80,22 +113,59 @@ const Carousel = ({
                 </button>
               )}
               {images.length > 1 && currIdx == idx && (
-                <div className="flex justify-between items-center w-[640px] h-[640px] absolute z-20">
-                  <button
-                    className="rotate-180 ml-5"
-                    onClick={() => prev(idx - 1)}
-                  >
-                    <img className="w-5" src={arrow}></img>
-                  </button>
-                  <button className="mr-5" onClick={() => next(idx + 1)}>
-                    <img className="w-5" src={arrow}></img>
-                  </button>
-                </div>
+                <>
+                  <div className="flex justify-between items-center w-[640px] h-[640px] absolute z-20">
+                    <button
+                      className="rotate-180 ml-5"
+                      onClick={() => prev(idx - 1)}
+                    >
+                      <img className="w-5" src={arrow}></img>
+                    </button>
+                    <button className="mr-5" onClick={() => next(idx + 1)}>
+                      <img className="w-5" src={arrow}></img>
+                    </button>
+                  </div>
+                  <form className="absolute bottom-0 z-20 flex pl-5 pb-5 space-x-5">
+                    <select
+                      name="name"
+                      className="border border-gray-400"
+                      defaultValue={image.name}
+                      {...(register('name'),
+                      {
+                        required: true,
+                        onChange: (e) => handleInputChanges(e, image, idx),
+                      })}
+                      aria-invalid={errors.name ? 'true' : 'false'}
+                    >
+                      <option hidden>Name...</option>
+                      {toothNames.map((toothName) => (
+                        <option value={toothName}>{toothName}</option>
+                      ))}
+                    </select>
+                    <select
+                      name="location"
+                      className="border border-gray-400"
+                      defaultValue={image.location}
+                      {...(register('location'),
+                      {
+                        required: true,
+                        onChange: (e) => handleInputChanges(e, image, idx),
+                      })}
+                      aria-invalid={errors.location ? 'true' : 'false'}
+                    >
+                      <option hidden>Location...</option>
+                      {toothLocations.map((treatment) => (
+                        <option value={treatment}>{treatment}</option>
+                      ))}
+                    </select>
+                  </form>
+                </>
               )}
+
               <img
                 className={`-translate-x-[${rightPos.toString()}px] transform transition-all w-[640px] h-[640px]`}
                 style={{ transform: `translate(-${rightPos.toString()}px)` }}
-                src={image}
+                src={image.url}
                 alt="detection image"
               ></img>
             </>

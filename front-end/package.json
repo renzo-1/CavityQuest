@@ -1,6 +1,6 @@
 {
   "proxy": "http://localhost:8000",
-  "description": "A foundation for scalable desktop apps",
+  "description": "Tooth  decay detection using YOLOv7",
   "keywords": [
     "electron",
     "boilerplate",

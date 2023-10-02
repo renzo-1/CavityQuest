@@ -9,7 +9,6 @@ export const formatPatientData = (
   const mName = data?.middleName ? data?.middleName!.charAt(0) + '.' : '';
   const fullName = data.lastName + ', ' + data.firstName + ' ' + mName;
   const treatments = data.history?.map((h) => ` ${h.treatment}`);
-  console.log('treatments', treatments);
   const formattedData = {
     id,
     patientNumber,

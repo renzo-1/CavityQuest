@@ -1,1 +1,5 @@
-export const labels: string[] = ['healthytooth', 'earlydecay', 'decaycavity'].reverse();
+export const labels: string[] = [
+  'healthytooth',
+  'earlydecay',
+  'decaycavity',
+].reverse();

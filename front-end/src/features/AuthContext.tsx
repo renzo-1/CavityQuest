@@ -27,7 +27,6 @@ const AuthProvider: React.FC<AppProps> = ({ children }) => {
           uid: user.uid,
           email: user.email || '',
         });
-        console.log(user);
         navigate('/');
       } else {
         navigate('/auth');

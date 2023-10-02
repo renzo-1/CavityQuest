@@ -20,6 +20,8 @@ const toBase64 = (file: File) =>
 
 export const uploadFile = async (
   imageUpload: File | string,
+  toothLocation?: string,
+  toothName?: string,
   fileName?: string
 ) => {
   // const { currPatient } = useAppContext() as ContextType;
@@ -42,6 +44,8 @@ export const uploadFile = async (
         name,
         offlineUrl,
         onlineUrl: '',
+        toothLocation,
+        toothName,
         createdOn: Timestamp.now(),
       };
     }
@@ -52,6 +56,8 @@ export const uploadFile = async (
         name,
         onlineUrl: '',
         offlineUrl,
+        toothLocation,
+        toothName,
         createdOn: Timestamp.now(),
       };
       const snapshot = await uploadBytes(imageRef, imageUpload);
@@ -81,6 +87,8 @@ export const uploadFile = async (
         name,
         onlineUrl: '',
         offlineUrl: imageUpload,
+        toothLocation,
+        toothName,
         createdOn: Timestamp.now(),
       };
     }
@@ -90,6 +98,8 @@ export const uploadFile = async (
       const uploadedFile = {
         name,
         onlineUrl: '',
+        toothLocation,
+        toothName,
         offlineUrl: imageUpload,
         createdOn: Timestamp.now(),
       };
