@@ -58,13 +58,13 @@ const Detection = ({
 
   // configs
   const modelName = 'Cavity Detection';
-  const threshold = 0.3;
+  const threshold = 0.45;
 
   const detectFrame = async (model: tf.GraphModel) => {
     if (!liveDetection.current) return;
-
     try {
       tf.engine().startScope();
+
       const input = tf.tidy(() => {
         if (videoRef.current) {
           const img = tf.image
@@ -75,9 +75,16 @@ const Detection = ({
           return img;
         }
       });
+      const startTime = new Date().getTime();
 
       if (input) {
         await model.executeAsync(input).then((res: any) => {
+          console.log(
+            'inference time:',
+            new Date().getTime() - startTime,
+            'ms'
+          );
+
           res = res.arraySync()[0];
           var detections = non_max_suppression(res);
           const boxes = shortenedCol(detections, [0, 1, 2, 3]);

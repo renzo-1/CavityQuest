@@ -8,8 +8,11 @@ export default function deleteSourceMaps() {
     rimraf.sync(path.join(webpackPaths.distMainPath, 'main.js.map'), {
       glob: true,
     });
+  rimraf.sync(path.join(webpackPaths.distMainPath, 'preload.js.map'), {
+    glob: true,
+  });
   if (fs.existsSync(webpackPaths.distRendererPath))
-    rimraf.sync(path.join(webpackPaths.distRendererPath, 'preload.js.map'), {
+    rimraf.sync(path.join(webpackPaths.distRendererPath, 'renderer.js.map'), {
       glob: true,
     });
 }

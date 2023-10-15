@@ -62,10 +62,11 @@ const PatientForm = ({
   const onSubmit = async (data: CreatePatientData) => {
     const toastId = toast.loading('Saving record...');
     setIsLoading(toast.isActive(toastId));
+    console.log(uploadedFiles);
     try {
       const internetStatus = navigator.onLine;
       const imgs = await Promise.all(
-        Array.from(data.imageUploads).map((file) => uploadFile(file))
+        Array.from(data.imageUploads).map((file) => uploadFile(file, '', ''))
       );
       console.log('imgs', imgs);
       const dateOfBirth = new Date(data.dateOfBirth).toISOString().slice(0, 10);

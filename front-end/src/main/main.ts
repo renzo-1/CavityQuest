@@ -149,8 +149,8 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  // const menuBuilder = new MenuBuilder(mainWindow);
-  // if (isDebug) menuBuilder.buildMenu();
+  const menuBuilder = new MenuBuilder(mainWindow);
+  if (isDebug) menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {

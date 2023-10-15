@@ -43,7 +43,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   const [currPatient, setCurrPatient] = useState<
     FormattedPatientData | undefined
   >();
-  const [currClinic, setCurrClinic] = useState<Clinic>();
+  const [currClinic, setCurrClinic] = useState<Clinic | undefined>();
   const [dentists, setDentists] = useState<DentistProps[] | undefined>();
   const [clinics, setClinics] = useState<Clinic[]>([]);
 
@@ -131,6 +131,10 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
       getClinics();
     }
   }, [currClinic?.id, auth, auth?.uid]);
+
+  useEffect(() => {
+      setCurrClinic(undefined);
+  }, [auth?.uid]);
 
   // ONLINE: Clinic updates for patients and dentists
   const updateClinic = async (newDataRef: DocumentReference, field: string) => {

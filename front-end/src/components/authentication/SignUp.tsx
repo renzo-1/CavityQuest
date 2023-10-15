@@ -98,7 +98,6 @@ const SignUp = () => {
           descs={{ required: 'Email is required' }}
         />
       </label>
-
       <label>
         <p className="font-medium">Password</p>
         <input
