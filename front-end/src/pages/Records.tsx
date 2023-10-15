@@ -25,11 +25,19 @@ const Records = () => {
       !patientData.includes(undefined!)
     ) {
       patientData.map(
-        ({ id, patientNumber, fullName, createdOn, treatments }) => {
+        ({
+          id,
+          patientNumber,
+          fullName,
+          createdOn,
+          treatments,
+          contactNumber,
+        }) => {
           const formattedDate = formatDate(new Date(createdOn.seconds * 1000));
 
           rowsArr.push({
             number: patientNumber,
+            contactNumber,
             id,
             fullName,
             createdOn: formattedDate,
@@ -42,19 +50,20 @@ const Records = () => {
   }, [patientData, currClinic, clinics]);
 
   const columns: GridColDef[] = [
-    { field: 'number', headerName: 'Number', width: 200 },
+    { field: 'number', headerName: 'Number', width: 150 },
     { field: 'id', headerName: 'id', width: 0 },
-    { field: 'fullName', headerName: 'Name', width: 550 },
+    { field: 'fullName', headerName: 'Name', width: 400 },
+    { field: 'contactNumber', headerName: 'Phone number', width: 400 },
     {
       field: 'createdOn',
       headerName: 'Created on',
       type: 'string',
-      width: 500,
+      width: 400,
     },
     {
       field: 'treatments',
       headerName: 'Treatments',
-      width: 500,
+      width: 400,
     },
   ];
 

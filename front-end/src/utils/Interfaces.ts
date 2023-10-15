@@ -152,6 +152,7 @@ type tableData = {
   number: number | string;
   id: number | string;
   fullName: string;
+  contactNumber: string;
   createdOn: string;
   treatments: string[];
 };

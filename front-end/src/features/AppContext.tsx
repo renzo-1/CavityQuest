@@ -133,7 +133,8 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   }, [currClinic?.id, auth, auth?.uid]);
 
   useEffect(() => {
-      setCurrClinic(undefined);
+    // setCurrClinic(undefined);
+    setShowClinicsMenu(true);
   }, [auth?.uid]);
 
   // ONLINE: Clinic updates for patients and dentists
