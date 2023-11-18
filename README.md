@@ -1,6 +1,6 @@
 # CavityQuest
 **Cavity Detection AI Tool**
-This thesis aims to create a cavity detection AI tool using YOLOv7, Electron, React, Fribase, and Roboflow.
+This thesis aims to create a cavity detection AI tool using YOLOv7, Electron, React, Firebase, and Roboflow.
 ![image](https://github.com/renzo-1/CavityQuest/assets/125778691/0b791be8-73a0-4986-9c78-0a2a1ddd55ee)
 
 **Introduction**
