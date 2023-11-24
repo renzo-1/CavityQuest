@@ -1,31 +1,29 @@
 # CavityQuest
 **Cavity Detection AI Tool**
-This thesis aims to create a cavity detection AI tool using YOLOv7, Electron, React, Django, Roboflow, and a cloud service.
-![image](https://github.com/renzo-1/CavityQuest/assets/125778691/f96373c5-7244-40d1-966d-5e3d6304cd23)
+This thesis aims to create a cavity detection AI tool using YOLOv7, Electron, React, Firebase, and Roboflow.
+![image](https://github.com/renzo-1/CavityQuest/assets/125778691/0b791be8-73a0-4986-9c78-0a2a1ddd55ee)
 
 **Introduction**
 Cavities are a common dental problem that can cause pain, infection, and tooth loss. Early detection and treatment of cavities is important to prevent these complications. However, traditional methods of cavity detection, such as visual inspection by a dentist, can be time-consuming and inaccurate.
-The proposed solution is to create a cavity detection AI tool that can use YOLOv7, Electron, Python, Django, and cloud service to detect cavities in teeth. YOLOv7 is a deep learning object detection model that can be used to detect objects in images. Electron is a framework that can be used to create cross-platform desktop applications. Python is a programming language that is well-suited for machine learning tasks. Django is a web framework that can be used to create web applications. Cloud service can be used to store and process data.
+The proposed solution is to create a cavity detection AI tool that uses YOLOv7, Electron, React, and Firebase, to detect cavities in teeth. YOLOv7 is a deep learning object detection model that can be used to detect objects in images. 
 
-A dataset of images of teeth with and without cavities will be collected.
-The images will be pre-processed to remove noise and improve the quality of the data.
-YOLOv7 will be trained on the pre-processed images.
-The trained YOLOv7 model will be used to detect cavities in new images.
-An Electron app will be created to allow users to upload images of teeth and detect cavities.
-The Electron app will be deployed to the cloud.
+The dataset came from Robolofow, and it comes pre-annotated and is segmented into three categories: 988 images for training, 279 for validation, and 125 for testing purposes.
+YOLOv7 is trained on the pre-processed images.
+The trained YOLOv7 model is used to detect cavities in new images/realtime video.
+An Electron app is be created to allow users to have realtime tooth detection of tooth decay. The app also includes a patient record system, which enables the dentists to make treatment planning.
 
 **Results**
-The results of the proposed solution will be evaluated using the following metrics:
+The results of the proposed solution is evaluated using the following metrics:
 
-Accuracy: The accuracy of the cavity detection model will be measured by the percentage of images that are correctly classified as having or not having cavities.
-Precision: The precision of the cavity detection model will be measured by the percentage of images that are classified as having cavities that actually have cavities.
-Recall: The recall of the cavity detection model will be measured by the percentage of images that actually have cavities that are classified as having cavities.
-![image](https://github.com/renzo-1/CavityQuest/assets/125778691/b3a1c4fc-f182-4c2c-97b6-b73a7b27977f)
+Mean Average Precision: The Mean Average Precision (mAP) serves as the prevailing benchmark metric employed by the computer vision research community for assessing the resilience and performance of object detection model.
+Inference Time: The inference time is how long is takes for a forward propagation.
+Precision-Recall Curve: It is a graphical representation of the trade-off between precision and recall at different confidence score thresholds.
+![image](https://github.com/renzo-1/CavityQuest/assets/125778691/14e43dce-5023-44f6-901f-d86723e2bbf8)
 
 **References**
 YOLOv7: https://github.com/WongKinYiu/yolov7
 Electron: https://electronjs.org/
 React: https://react.dev/
-Django: https://www.djangoproject.com/
+Firebase: https://firebase.google.com/
 Roboflow: https://roboflow.com/
-Cloud Service: https://cloud.google.com/
+
