@@ -11,8 +11,9 @@ import {
   Menu,
   Detection,
   Records,
-  ShowPatientInfo,
+  PatientRecord,
   Authentication,
+  AuditTrails,
 } from 'pages';
 import { AppProvider, AuthProvider } from 'features';
 import { ToastContainer } from 'react-toastify';
@@ -25,7 +26,7 @@ export default function App() {
       <Landing />
       <ToastContainer limit={1} />
       <Landing />
-      <Router>
+      <Router initialEntries={['/clinic/']}>
         <AuthProvider>
           <AppProvider>
             <Routes>
@@ -39,11 +40,37 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/:clinic/detection/:id" element={<Detection />} />
-              <Route path="/:clinic/records" element={<Records />} />
+              <Route
+                path="/:clinic/detection/:id"
+                element={
+                  <ProtectedRoute>
+                    <Detection />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/:clinic/records"
+                element={
+                  <ProtectedRoute>
+                    <Records />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/:clinic/auditTrails"
+                element={
+                  <ProtectedRoute>
+                    <AuditTrails />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/:clinic/records/:id"
-                element={<ShowPatientInfo />}
+                element={
+                  <ProtectedRoute>
+                    <PatientRecord />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </AppProvider>

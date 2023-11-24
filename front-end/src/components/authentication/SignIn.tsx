@@ -1,16 +1,17 @@
-import React, { SetStateAction, Dispatch } from 'react';
+import React, { SetStateAction, Dispatch, useState } from 'react';
 import {
   getAuth,
   signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
+  signOut,
 } from 'firebase/auth';
-import FormFieldError from 'components/patientForm/FormFieldError';
+import FormFieldError from 'components/patient/FormFieldError';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from 'features/AuthContext';
-import { AuthContextType } from 'utils/Interfaces';
 import { toast } from 'react-toastify';
+import SendVerification from './SendVerification';
 interface FormType {
   email: string;
   password: string;
@@ -40,10 +41,24 @@ const SignIn = ({
         data.email,
         data.password
       );
+
+      console.log(userCredentials);
+      if (!userCredentials.user.emailVerified) {
+        toast.update(toastId, {
+          render: <SendVerification user={auth.currentUser!} />,
+          type: 'info',
+          autoClose: 10000,
+          isLoading: false,
+        });
+        await signOut(auth);
+        return;
+      }
+
       setAuth({
         uid: userCredentials.user.uid,
         email: userCredentials.user.email || '',
       });
+
       navigate('/');
       toast.update(toastId, {
         render: '👋 Hello there',
@@ -105,7 +120,7 @@ const SignIn = ({
         />
       </label>
       <span
-        className="underline cursor-pointer"
+        className="underline cursor-pointer w-fit"
         onClick={() => setIsForgotPassword(true)}
       >
         Forgot password?

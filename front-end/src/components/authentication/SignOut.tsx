@@ -3,16 +3,22 @@ import { getAuth, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import { useAppContext } from 'features/AppContext';
 const SignOut = () => {
   const navigate = useNavigate();
-
+  const { setCurrClinic, setPatients, setCurrPatient } =
+    useAppContext() as ContextType;
   const handleSignOut = () => {
     const auth = getAuth();
     const toastId = toast.loading('Signing out...');
 
     signOut(auth)
       .then(() => {
+        setCurrClinic(undefined);
+        setPatients([]);
+        setCurrPatient(undefined);
         navigate('/auth');
+
         toast.update(toastId, {
           render: 'Signed out',
           type: 'success',

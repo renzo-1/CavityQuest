@@ -1,12 +1,8 @@
-import React, { Dispatch, SetStateAction, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
 import { toast } from 'react-toastify';
-import { doc, deleteDoc } from '@firebase/firestore';
-import { db } from 'utils/firebase-config';
-import { getStorage, ref, deleteObject } from 'firebase/storage';
-import { newError } from 'builder-util-runtime';
+import { doc, updateDoc, Timestamp, arrayUnion } from '@firebase/firestore';
 
 const DeleteRecord = ({
   handleDeletionState,
@@ -15,36 +11,28 @@ const DeleteRecord = ({
 }) => {
   const navigate = useNavigate();
   const { clinic } = useParams();
-  const { currPatient, deletePatientOnClinic } = useAppContext() as ContextType;
-  const storage = getStorage();
+  const { currPatient, clinicCollection, patientCollection, currClinic } =
+    useAppContext() as ContextType;
 
   const handleConfirmedDeletion = async () => {
     const toastId = toast.loading('Deleting record...');
     try {
-      // 1. Delete images saved on the patient record
-      const imageUploads = currPatient?.imageUploads!;
+      const patientRef = doc(patientCollection, currPatient?.id!);
+      const clinicRef = doc(clinicCollection, currClinic?.id);
 
-      // if (imageUploads && imageUploads.length > 0) {
-      //   toast.update(toastId, {
-      //     render: 'Deleting dectection images',
-      //     type: 'info',
-      //     isLoading: true,
-      //   });
-      //   for (let img of imageUploads!) {
-      //     const imgRef = ref(storage, `images/${img.name}`);
+      const newAT: AuditTrail = {
+        contactNumber: currPatient?.contactNumber!,
+        patientName: currPatient?.fullName!,
+        id: currPatient?.id!,
+        date: Timestamp.now(),
+        type: 'delete',
+      };
 
-      //     // Delete the file
-      //     await deleteObject(imgRef);
-      //   }
-      // }
+      await updateDoc(patientRef, { isActive: false });
+      await updateDoc(clinicRef, {
+        auditTrails: arrayUnion(newAT),
+      });
 
-      const recordRef = doc(db, 'patients', currPatient?.id!);
-      // 2. Delete the patient on clinic records.
-      deletePatientOnClinic(recordRef);
-      // 3. Delete the actual patient record
-      await deleteDoc(recordRef);
-
-      // getPatients();
       toast.update(toastId, {
         render: 'Deleted successfully',
         type: 'success',
@@ -52,9 +40,10 @@ const DeleteRecord = ({
         isLoading: false,
       });
       if (clinic) {
-        navigate(`/${clinic}/records`);
+        navigate(`/${currClinic?.id}/records`);
       }
     } catch (e) {
+      console.log(e);
       toast.update(toastId, {
         render: 'An error occured while deleting the record. Try reloading.',
         type: 'error',

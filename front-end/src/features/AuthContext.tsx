@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthContextType, Auth } from 'utils/Interfaces';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
 interface AppProps {
@@ -22,7 +21,7 @@ const AuthProvider: React.FC<AppProps> = ({ children }) => {
       if (!user && !navigator.onLine) {
         navigate('/auth');
       }
-      if (user) {
+      if (user && user.emailVerified) {
         setAuth({
           uid: user.uid,
           email: user.email || '',

@@ -2,12 +2,10 @@ import React, { useState, ChangeEvent, useRef } from 'react';
 import { closeBtn, plusWhite } from '../../../assets';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { AuthContextType, ContextType } from 'utils/Interfaces';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import BackButton from '../BackButton';
-import { collection, addDoc, FieldValue } from 'firebase/firestore';
+import { addDoc, FieldValue } from 'firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { useAuthContext } from 'features/AuthContext';
 
@@ -20,9 +18,8 @@ const ClinicForm = () => {
     reset,
   } = useForm<{ name: string }>();
 
-  const { currClinic, setCurrClinic, clinics, dentists } =
+  const { currClinic, setCurrClinic, clinics, dentists, clinicCollection } =
     useAppContext() as ContextType;
-  const clinicCollection = collection(db, 'clinics');
   const { auth } = useAuthContext() as AuthContextType;
 
   const handleClinicChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -46,7 +43,6 @@ const ClinicForm = () => {
           patients: [],
           dentists: [],
         });
-
       } else {
         newClinicRef = addDoc(clinicCollection, {
           name: data.name,

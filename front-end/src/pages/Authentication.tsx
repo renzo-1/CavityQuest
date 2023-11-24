@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuthContext } from 'features/AuthContext';
-import { AuthContextType } from 'utils/Interfaces';
 import { Navigate } from 'react-router-dom';
 import {
   SignIn,

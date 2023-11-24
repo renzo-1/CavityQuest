@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { collection, addDoc, FieldValue } from 'firebase/firestore';
 import { db } from 'utils/firebase-config';
 import { check, closeBtn, closeWhite, plusWhite } from '../../../assets';
-import { AuthContextType, ContextType } from 'utils/Interfaces';
+
 import { useAuthContext } from 'features/AuthContext';
 
 const ClinicsMenu = ({
@@ -14,17 +14,14 @@ const ClinicsMenu = ({
   setShowClinics: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [isAddingClinic, setIsAddingClinic] = useState<boolean>(false);
-  const { clinics, setCurrClinic, currClinic, setShowClinicsMenu } =
+  const { clinics, setCurrClinic, currClinic, clinicCollection } =
     useAppContext() as ContextType;
   const {
     register,
     formState: { errors },
     handleSubmit,
     reset,
-    watch,
-    setValue,
   } = useForm<{ name: string }>();
-  const clinicCollection = collection(db, 'clinics');
   const { auth } = useAuthContext() as AuthContextType;
 
   const onSubmit = async (data: { name: string }) => {

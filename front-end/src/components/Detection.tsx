@@ -15,10 +15,10 @@ import { WebcamOps } from '../utils/webcam';
 import { renderBoxes } from '../utils/renderBox';
 import { non_max_suppression } from '../utils/nonMaxSuppression';
 // import '../styles/App.css';
-import { BackButton } from 'components';
+import { HeaderButtons } from 'components';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { ContextType, Capture } from 'utils/Interfaces';
+
 
 function shortenedCol(arrayofarray: any, indexlist: any) {
   return arrayofarray.map(function (array: number[]) {
@@ -190,7 +190,7 @@ const Detection = ({
     <>
       <div className="flex z-30 w-full justify-between">
         <div onClick={handleCloseCam}>
-          <BackButton />
+          <HeaderButtons home={false} records={false} auditTrails={false} />
         </div>
         <div>
           <button

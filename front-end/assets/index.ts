@@ -15,7 +15,10 @@ import closeWhite from './icons/closeWhite.svg';
 import list from './icons/list.svg';
 import tooth3d from './3d-tooth.png';
 import threeDots from './icons/threeDots.svg';
-import pencilSqaure from './icons/pencil-square.svg'
+import pencilSqaure from './icons/pencil-square.svg';
+import clockHistory from './icons/clock-history.svg';
+import home from './icons/home.svg';
+import pdf from './icons/filetype-pdf.svg';
 export {
   detection,
   records,
@@ -32,5 +35,9 @@ export {
   closeWhite,
   list,
   tooth3d,
-  threeDots, pencilSqaure
+  threeDots,
+  pencilSqaure,
+  clockHistory,
+  home,
+  pdf,
 };

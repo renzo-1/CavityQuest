@@ -1,8 +1,7 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from 'features/AuthContext';
-import { AuthContextType } from 'utils/Interfaces';
-import FormFieldError from 'components/patientForm/FormFieldError';
+import FormFieldError from 'components/patient/FormFieldError';
 import { closeBtn } from '../../../assets';
 import { toast } from 'react-toastify';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';

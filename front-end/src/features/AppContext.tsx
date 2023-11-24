@@ -1,12 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  DentistProps,
-  Clinic,
-  ContextType,
-  FormattedPatientData,
-  ImageUpload,
-  AuthContextType,
-} from 'utils/Interfaces';
+
 import { db } from 'utils/firebase-config';
 import {
   collection,
@@ -38,41 +31,45 @@ export const useAppContext = () => {
 
 const AppProvider: React.FC<AppProps> = ({ children }) => {
   const { auth } = useAuthContext() as AuthContextType;
-  const [patientData, setPatientData] = useState<FormattedPatientData[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [showClinicsMenu, setShowClinicsMenu] = useState<boolean>(true);
-  const [currPatient, setCurrPatient] = useState<
-    FormattedPatientData | undefined
-  >();
+  const [currPatient, setCurrPatient] = useState<Patient | undefined>();
   const [currClinic, setCurrClinic] = useState<Clinic | undefined>();
   const [dentists, setDentists] = useState<DentistProps[] | undefined>();
   const [clinics, setClinics] = useState<Clinic[]>([]);
 
-  const clinicsCollection = collection(db, 'clinics');
-  const patientsCollection = collection(db, 'patients');
-  const imagesCollection = collection(db, 'images');
-  const dentistsCollection = collection(db, 'dentists');
-
+  const clinicCollection = collection(db, 'clinics');
+  const patientCollection = collection(db, 'patients');
+  const imageCollection = collection(db, 'images');
+  const dentistCollection = collection(db, 'dentists');
+  const deletedPatientCollection = collection(db, 'deletedPatients');
+  const contactNumberCollection = collection(db, 'contactNumbers');
   // GET PATIENTS OF THE CLINIC
   const getPatients = async (clinics: Clinic[]) => {
-    let patientsArr: FormattedPatientData[] = [];
+    let patientsArr: Patient[] = [];
     try {
       if (currClinic) {
         const clinic: Clinic = clinics.filter(
           (clinic) => clinic.id == currClinic.id
         )[0];
 
-        // console.log(clinic.patients);
         await Promise.all(
           clinic.patients.map(
             async (patientRef: DocumentReference, index: number) => {
               const docSnap = await getDoc(patientRef);
-              if (docSnap.exists()) {
-                // console.log(index, docSnap.data());
-                const data: any = docSnap.data();
+              // await updateDoc(patientRef, {isActive: true})
 
-                patientsArr.push(
-                  formatPatientData(data, docSnap.id, index + 1, currClinic?.id)
-                );
+              if (docSnap.exists()) {
+                const data: Patient = docSnap.data() as Patient;
+                if (data.isActive)
+                  patientsArr.push(
+                    formatPatientData(
+                      data,
+                      docSnap.id,
+                      index + 1,
+                      currClinic?.id
+                    )
+                  );
               }
             }
           )
@@ -81,7 +78,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
     } catch (e) {
       console.log(e);
     }
-    setPatientData(patientsArr);
+    setPatients(patientsArr);
   };
 
   const getDentists = async (clinics: Clinic[]) => {
@@ -103,7 +100,6 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
           })
         );
       }
-      // console.log('dentistarr,', dentistsArr);
       setDentists(dentistsArr);
     } catch (e) {
       console.log(e);
@@ -111,7 +107,8 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   };
 
   const getClinics = () => {
-    const q = query(clinicsCollection, where('uid', '==', auth?.uid));
+    const q = query(clinicCollection, where('uid', '==', auth?.uid));
+
     onSnapshot(q, { includeMetadataChanges: true }, (querySnapshot) => {
       const clinicSnap: Clinic[] = querySnapshot.docs.map((doc) => ({
         patients: doc.data().patients,
@@ -119,10 +116,12 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
         name: doc.data().name,
         uid: doc.data().uid,
         id: doc.id,
+        auditTrails: doc.data().auditTrails,
       }));
-      setClinics(clinicSnap);
-      getPatients(clinicSnap);
-      getDentists(clinicSnap);
+      console.log('first', clinicSnap);
+      setClinics([...clinicSnap]);
+      getPatients([...clinicSnap]);
+      getDentists([...clinicSnap]);
     });
   };
 
@@ -133,14 +132,14 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   }, [currClinic?.id, auth, auth?.uid]);
 
   useEffect(() => {
-    // setCurrClinic(undefined);
+    setCurrClinic(undefined);
     setShowClinicsMenu(true);
   }, [auth?.uid]);
 
   // ONLINE: Clinic updates for patients and dentists
   const updateClinic = async (newDataRef: DocumentReference, field: string) => {
     if (currClinic) {
-      const clinicRef = doc(clinicsCollection, currClinic?.id);
+      const clinicRef = doc(clinicCollection, currClinic?.id);
       const clinicSnap = await getDoc(clinicRef);
 
       if (clinicSnap.exists()) {
@@ -151,7 +150,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
 
   const addPatientOffline = (fName: string, lName: string, mName?: string) => {
     if (!navigator.onLine) {
-      const q = query(patientsCollection);
+      const q = query(patientCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         for (let docChange of snapshot.docChanges()) {
           const { firstName, middleName, lastName } = docChange.doc.data();
@@ -162,7 +161,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             middleName == mName &&
             lastName == lName
           ) {
-            const clinicRef = doc(clinicsCollection, currClinic?.id);
+            const clinicRef = doc(clinicCollection, currClinic?.id);
             updateDoc(clinicRef, {
               patients: arrayUnion(docChange.doc.ref),
             });
@@ -175,7 +174,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   // OFFLINE: listens for dentists creations, and append it to current clinic
   const addDentistOffline = (dentistName: string) => {
     if (!navigator.onLine) {
-      const q = query(dentistsCollection);
+      const q = query(dentistCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         snapshot.docChanges().forEach(async (change, index) => {
           // console.log(change.doc.data().name == dentistName);
@@ -184,7 +183,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             currClinic &&
             change.doc.data().name == dentistName
           ) {
-            const clinicRef = doc(clinicsCollection, currClinic?.id);
+            const clinicRef = doc(clinicCollection, currClinic?.id);
             updateDoc(clinicRef, {
               dentists: arrayUnion(change.doc.ref),
             });
@@ -198,7 +197,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   // // OFFLINE: listen for image creations, and append it to current patient
   const addImageOffline = (name: string) => {
     if (!navigator.onLine) {
-      const q = query(imagesCollection);
+      const q = query(imageCollection);
       onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
           if (
@@ -207,7 +206,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
             currPatient.id &&
             change.doc.data().name == name
           ) {
-            const patientRef = doc(patientsCollection, currPatient.id);
+            const patientRef = doc(patientCollection, currPatient.id);
             updateDoc(patientRef, {
               imageUploads: arrayUnion(change.doc.ref),
             });
@@ -223,7 +222,7 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
     deletedPatientRef: DocumentReference
   ) => {
     if (currClinic) {
-      const clinicRef = doc(clinicsCollection, currClinic?.id);
+      const clinicRef = doc(clinicCollection, currClinic?.id);
 
       await updateDoc(clinicRef, {
         patients: arrayRemove(deletedPatientRef),
@@ -234,8 +233,8 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        patientData,
-        setPatientData,
+        patients,
+        setPatients,
         // getDentists,
         getPatients,
         showClinicsMenu,
@@ -253,6 +252,12 @@ const AppProvider: React.FC<AppProps> = ({ children }) => {
         addImageOffline,
         addDentistOffline,
         addPatientOffline,
+        clinicCollection,
+        patientCollection,
+        imageCollection,
+        dentistCollection,
+        deletedPatientCollection,
+        contactNumberCollection,
       }}
     >
       {children}

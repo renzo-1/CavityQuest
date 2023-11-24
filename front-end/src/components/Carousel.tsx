@@ -8,7 +8,6 @@ import React, {
   ChangeEvent,
 } from 'react';
 import { arrow, closeBtn, trash } from '../../assets';
-import { Capture } from 'utils/Interfaces';
 import { toothNames, toothLocations } from 'data/teeth';
 import { useForm } from 'react-hook-form';
 

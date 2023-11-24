@@ -1,6 +1,6 @@
-import { FormattedPatientData, PatientData } from './Interfaces';
+import { Patient } from './interfaces';
 export const formatPatientData = (
-  data: PatientData,
+  data: Patient,
   // dentist: string,
   id: string,
   patientNumber: number,
@@ -27,6 +27,7 @@ export const formatPatientData = (
     note: data.note,
     treatments,
     createdOn: data.createdOn,
+    isActive: data.isActive,
   };
   return formattedData;
 };

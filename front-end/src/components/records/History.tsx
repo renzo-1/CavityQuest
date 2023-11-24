@@ -1,18 +1,16 @@
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
 import React, { useState, ChangeEvent } from 'react';
 import formatDate from 'utils/formatDate';
 import { Timestamp } from 'firebase/firestore';
 import { treatments } from 'data/treatments';
 import { useForm } from 'react-hook-form';
-import { HistoryData } from 'utils/Interfaces';
 import { updateDoc, getDoc, doc, arrayUnion } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { db } from 'utils/firebase-config';
 import { pencilSqaure } from '../../../assets';
 import { toothNames, toothLocations } from 'data/teeth';
 const History = () => {
-  const { currPatient, dentists, setPatientData, setCurrPatient } =
+  const { currPatient, dentists, setPatients, setCurrPatient } =
     useAppContext() as ContextType;
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const {
@@ -28,7 +26,7 @@ const History = () => {
       treatment: treatments[0],
       toothName: toothNames[0],
       toothLocation: toothLocations[0],
-      createdOn: formatDate(new Date(Timestamp.now().seconds * 1000)),
+      createdOn: formatDate(new Date(Timestamp.now().seconds * 1000))[1],
     },
   });
 
@@ -61,7 +59,7 @@ const History = () => {
         });
       }
 
-      setPatientData((prevData) => {
+      setPatients((prevData) => {
         const newArr = prevData.filter(
           (patient) => patient?.id !== currPatient?.id
         );

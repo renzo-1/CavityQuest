@@ -5,22 +5,16 @@ import React, {
   SetStateAction,
   useMemo,
 } from 'react';
-import {
-  ContextType,
-  PatientData,
-  ImageUpload,
-  FormattedPatientData,
-} from 'utils/Interfaces';
+
 
 import formatDate from 'utils/formatDate';
 import { useAppContext } from 'features/AppContext';
-import { collection, getDoc } from 'firebase/firestore';
-import { db } from 'utils/firebase-config';
+import { getDoc } from 'firebase/firestore';
 // array to set to array (function: get unique dates)
 const getUniqueDateRecords = (arr: ImageUpload[]) => {
   try {
     const convertTimestampToDate = arr.map((file) => {
-      return formatDate(new Date(file.createdOn.seconds * 1000));
+      return formatDate(new Date(file.createdOn.seconds * 1000))[0];
     });
 
     return Array.from(new Set(convertTimestampToDate));
@@ -32,55 +26,23 @@ const getUniqueDateRecords = (arr: ImageUpload[]) => {
 
 interface Props {
   id?: string;
+  dateStamps: string[];
+  setDateStamps: Dispatch<SetStateAction<any>>;
+  images: ImageUpload[];
+  setImages: Dispatch<SetStateAction<ImageUpload[]>>;
 }
 
-const ShowImageRecords = ({ id }: Props) => {
-  const { patientData, setCurrPatient, currPatient, clinics } =
+const ShowImageRecords = ({
+  id,
+  dateStamps,
+  setDateStamps,
+  images,
+  setImages,
+}: Props) => {
+  const { patients, setCurrPatient, currPatient, clinics } =
     useAppContext() as ContextType;
-  const [dateStamps, setDateStamps] = useState<string[]>([]);
-  const [images, setImages] = useState<ImageUpload[]>([]);
 
-  // const dateStamps = useMemo(() => {
-  //   console.log(patientData);
-  //   if (currPatient) return getUniqueDateRecords(currPatient);
-  // }, [patientData]);
-  // setCurrPatient(patient);
-
-  // const getFile = async (img: string) => {
-  //   // returns base64
-  //   console.log('img', img);
-
-  //   try {
-  //     const res = await readFile(img);
-  //     return 'data:image/jpg;base64,' + res;
-  //   } catch (e) {
-  //     return;
-  //   }
-  // };
-  const imagesCollection = collection(db, 'images');
-  const patientsCollection = collection(db, 'patients');
-
-  // OFFLINE: listen for base64Images creations, and append it to current patient
-  // const saveImage = (patientId?: string) => {
-  //   if (!navigator.onLine) {
-  //     const q = query(imagesCollection);
-  //     onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-  //       snapshot.docChanges().forEach(async (change) => {
-  //         if (change.type === 'added' && patientId) {
-  //           const patientRef = doc(patientsCollection, patientId);
-  //           updateDoc(patientRef, {
-  //             imageUploads: arrayUnion(change.doc.ref),
-  //           });
-  //           // getClinics();
-  //         } else {
-  //           console.log('no image upload changes');
-  //         }
-  //       });
-  //     });
-  //   }
-  // };
-
-  const getImages = async (patient: FormattedPatientData | undefined) => {
+  const getImages = async (patient: Patient | undefined) => {
     if (!patient!.imageUploads) {
       return;
     }
@@ -104,7 +66,6 @@ const ShowImageRecords = ({ id }: Props) => {
           console.log('image does not exist');
         }
       }
-      console.log('imgs', imagesArr);
       setImages([...imagesArr]);
       setDateStamps(getUniqueDateRecords(imagesArr));
     } catch (error) {
@@ -115,14 +76,14 @@ const ShowImageRecords = ({ id }: Props) => {
   useEffect(() => {
     // if (!navigator.onLine) { PROD
 
-    for (let patient of patientData) {
+    for (let patient of patients) {
       if (patient.id?.toString() === id) {
         setCurrPatient(patient);
         getImages(patient);
         break;
       }
     }
-  }, [currPatient, patientData, currPatient?.imageUploads, clinics]);
+  }, [currPatient, patients, currPatient?.imageUploads]);
 
   return (
     <>
@@ -145,7 +106,7 @@ const ShowImageRecords = ({ id }: Props) => {
                 <div className="grid grid-cols-4 gap-8">
                   {images.map((img, index) => {
                     if (
-                      formatDate(new Date(img.createdOn.seconds * 1000)) ===
+                      formatDate(new Date(img.createdOn.seconds * 1000))[0] ===
                       date
                     )
                       return (

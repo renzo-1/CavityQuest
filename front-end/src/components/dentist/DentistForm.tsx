@@ -12,7 +12,7 @@ import { collection, addDoc, doc } from '@firebase/firestore';
 import { capitalize } from 'utils/capitilize';
 import { db } from 'utils/firebase-config';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
+
 
 const DentistForm = ({
   setIsShowDentistForm,
@@ -20,9 +20,13 @@ const DentistForm = ({
   setIsShowDentistForm: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [newDentist, setNewDentist] = useState<string>('');
-  const dentistsCollection = collection(db, 'dentists');
-  const { updateClinic, addDentistOffline, getClinics, dentists } =
-    useAppContext() as ContextType;
+  const {
+    updateClinic,
+    addDentistOffline,
+    getClinics,
+    dentists,
+    dentistCollection,
+  } = useAppContext() as ContextType;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,14 +35,14 @@ const DentistForm = ({
     try {
       // ONLINE
       if (navigator.onLine) {
-        const dentistRef = await addDoc(dentistsCollection, {
+        const dentistRef = await addDoc(dentistCollection, {
           name: captDentistName,
         });
         updateClinic(dentistRef, 'dentists');
       }
       // OFFLINE
       else {
-        addDoc(dentistsCollection, {
+        addDoc(dentistCollection, {
           name: captDentistName,
         });
         // updateClinic(dentistRef, 'dentists');

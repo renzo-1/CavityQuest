@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { WebcamOps } from '../utils/webcam';
 import { Carousel, Detection as Detect } from 'components';
 import { useAppContext } from 'features/AppContext';
-import { ContextType, Capture } from 'utils/Interfaces';
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -11,7 +11,6 @@ import {
   updateDoc,
   doc,
   arrayUnion,
-  // @ts-ignore
   Timestamp,
   collection,
   addDoc,
@@ -21,16 +20,20 @@ import { uploadFile } from 'utils/uploadFiles';
 
 const Detection = () => {
   const { id } = useParams();
-  const { currClinic, getPatients, getClinics, addImageOffline } =
-    useAppContext() as ContextType;
+  const {
+    currClinic,
+    getPatients,
+    getClinics,
+    addImageOffline,
+    imageCollection,
+    patientCollection,
+  } = useAppContext() as ContextType;
   const videoRef = useRef<HTMLVideoElement>(null);
   const webcamOps = new WebcamOps();
   const [captures, setCaptures] = useState<Capture[]>([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-  const imagesCollection = collection(db, 'images');
-  const patientCollection = collection(db, 'patients');
 
   const handleSubmit = async () => {
     if (captures.length < 1) return;
@@ -54,7 +57,7 @@ const Detection = () => {
         // OFFLINE
         if (!internetStatus) {
           imgs.map((img: any) => {
-            addDoc(imagesCollection, img);
+            addDoc(imageCollection, img);
             addImageOffline(img.name);
           });
           getClinics();
@@ -64,7 +67,7 @@ const Detection = () => {
         else {
           const patientRef = doc(patientCollection, id);
           imgs.map(async (img: any) => {
-            const imgRef = await addDoc(imagesCollection, img);
+            const imgRef = await addDoc(imageCollection, img);
             updateDoc(patientRef, {
               imageUploads: arrayUnion(imgRef),
             });

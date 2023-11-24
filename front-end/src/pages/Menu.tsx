@@ -3,7 +3,7 @@ import { detection, records } from '../../assets';
 import { PatientForm, MoreMenu, ClinicsMenu, DentistForm } from 'components';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'features/AppContext';
-import { ContextType } from 'utils/Interfaces';
+
 
 const Menu = () => {
   const [showPatientForm, setShowPatientForm] = useState<boolean>(false);
@@ -13,7 +13,7 @@ const Menu = () => {
     useAppContext() as ContextType;
   const navigate = useNavigate();
 
-  const handleClick = (e: MouseEvent): void => {
+  const handleOpenForm = (e: MouseEvent): void => {
     setShowPatientForm((prev) => !prev);
   };
   return (
@@ -57,18 +57,16 @@ const Menu = () => {
       <div className="h-full w-full flex justify-center items-center space-x-20 z-40">
         <button
           className="px-14 h-full max-h-[250px] bg-primary rounded-lg space-y-5 shadow-lg z-20 transition-all duration-500 ease-out"
-          onClick={handleClick}
+          onClick={handleOpenForm}
         >
           <img className="w-24" src={detection} alt="detection" />
           <h2 className="text-white font-bold tracking-wider">Detect</h2>
         </button>
-        <button className="px-14 h-full max-h-[250px] bg-blue-500 rounded-lg space-y-5 shadow-lg z-20 transition-all duration-500 ease-out">
-          <img
-            className="w-24"
-            src={records}
-            alt="records"
-            onClick={() => navigate(`/${currClinic?.id}/records`)}
-          />
+        <button
+          className="px-14 h-full max-h-[250px] bg-blue-500 rounded-lg space-y-5 shadow-lg z-20 transition-all duration-500 ease-out"
+          onClick={() => navigate(`/${currClinic?.id}/records`)}
+        >
+          <img className="w-24" src={records} alt="records" />
           <h2 className="text-white font-bold tracking-wider">Records</h2>
         </button>
       </div>

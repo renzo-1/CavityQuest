@@ -10,7 +10,9 @@ const PatientInfoField = ({
   return (
     <div>
       <h3 className="text-sm">{field}</h3>
-      <p className="font-bold text-xl rounded-lg">{data?.toString()}</p>
+      <p className="font-bold text-xl rounded-lg capitalize">
+        {data?.toString()}
+      </p>
     </div>
   );
 };

@@ -7,6 +7,7 @@ function getMonthName(monthNumber: number) {
 }
 
 const formatDate = (date: Date) => {
+  const time = date.toLocaleTimeString();
   const formattedDate =
     getMonthName(date.getMonth() + 1) +
     ' ' +
@@ -14,7 +15,7 @@ const formatDate = (date: Date) => {
     ', ' +
     date.getFullYear().toString();
 
-  return formattedDate;
+  return [formattedDate, time];
 };
 
 export default formatDate;

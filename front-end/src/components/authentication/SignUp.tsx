@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  setPersistence,
-  signInWithEmailAndPassword,
-  browserLocalPersistence,
+  sendEmailVerification,
+  signOut,
 } from 'firebase/auth';
-import FormFieldError from 'components/patientForm/FormFieldError';
+import FormFieldError from 'components/patient/FormFieldError';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from 'features/AuthContext';
-import { AuthContextType } from 'utils/Interfaces';
 
 interface FormType {
   email: string;
@@ -35,32 +33,30 @@ const SignUp = () => {
     console.log('data.email', data.email);
     console.log('data.password', data.password);
     setIsLoading(true);
-    const toastId = toast.loading('We are signing you up...');
+    const toastId = toast.loading('Checking credentials...');
     const auth = getAuth();
     setIsLoading;
     try {
-      await setPersistence(auth, browserLocalPersistence);
+      // await setPersistence(auth, browserLocalPersistence);
       // SIGN UP
       const userCredentials = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
-      console.log(userCredentials);
 
-      setAuth({
-        uid: userCredentials.user.uid,
-        email: userCredentials.user.email || '',
-      });
-
-      setIsLoading(false);
-      navigate('/');
+      await sendEmailVerification(auth.currentUser!);
       toast.update(toastId, {
-        render: '👋 Hello there',
-        type: 'success',
+        render: 'Please check your email for verification',
+        type: 'info',
         autoClose: 2000,
         isLoading: false,
       });
+      await signOut(auth);
+      setAuth(undefined);
+
+      setIsLoading(false);
+      navigate('/auth');
     } catch (error: any) {
       const errorCode = error.code.split('/')[1].split('-').join(' ');
       setIsLoading(false);

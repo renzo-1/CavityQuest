@@ -5,7 +5,6 @@ import {
   uploadString,
 } from 'firebase/storage';
 import { v4 } from 'uuid';
-// @ts-ignore
 import { Timestamp } from 'firebase/firestore';
 // import { sendFile, receiveFile } from './offlineImageUploads';
 import { storage } from './firebase-config';
