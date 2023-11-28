@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useAppContext } from 'features/AppContext';
 const SignOut = () => {
   const navigate = useNavigate();
-  const { setCurrClinic, setPatients, setCurrPatient } =
+  const { setCurrClinic, setPatients, setCurrPatient, setShowClinicsMenu } =
     useAppContext() as ContextType;
   const handleSignOut = () => {
     const auth = getAuth();
@@ -17,6 +17,7 @@ const SignOut = () => {
         setCurrClinic(undefined);
         setPatients([]);
         setCurrPatient(undefined);
+        setShowClinicsMenu(false)
         navigate('/auth');
 
         toast.update(toastId, {
@@ -27,7 +28,7 @@ const SignOut = () => {
         });
       })
       .catch((error) => {
-        toast.update(toastId, {
+        toast.update(toastId, { 
           render: error.message,
           type: 'error',
           autoClose: 2000,
